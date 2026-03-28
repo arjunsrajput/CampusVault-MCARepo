@@ -1,0 +1,61 @@
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0d0f;--bg2:#141416;--bg3:#1c1c1f;--card:#161618;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --text:#eeedf5;--text2:#9896aa;--text3:#55546a;
+  --accent:#7c6fff;--accent2:#a899ff;--accent-bg:rgba(124,111,255,0.12);--accent-dim:rgba(124,111,255,0.18);
+  --green:#22c55e;--green-bg:rgba(34,197,94,0.1);
+  --amber:#f59e0b;--amber-bg:rgba(245,158,11,0.1);--amber-dim:rgba(245,158,11,0.18);
+  --red:#ef4444;--red-bg:rgba(239,68,68,0.1);
+  --teal:#14b8a6;--teal-bg:rgba(20,184,166,0.1);--teal-dim:rgba(20,184,166,0.18);
+  --radius:10px;--radius-lg:14px;--radius-sm:7px;
+  --font-head:'Syne',sans-serif;--font-body:'DM Sans',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);font-size:15px;line-height:1.6;min-height:100vh;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:var(--font-head);line-height:1.2}
+a{color:inherit;text-decoration:none}
+button{font-family:var(--font-body);cursor:pointer;border:none;outline:none;transition:all .15s}
+input,select,textarea{font-family:var(--font-body);background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:var(--radius);padding:10px 14px;font-size:14px;outline:none;transition:border-color .15s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+input::placeholder,textarea::placeholder{color:var(--text3)}
+select option{background:var(--bg3);color:var(--text)}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:var(--radius);font-size:14px;font-weight:500;font-family:var(--font-body);transition:all .15s;cursor:pointer;border:none}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent2);transform:translateY(-1px)}
+.btn-primary:active{transform:translateY(0)}
+.btn-primary:disabled{opacity:.6;pointer-events:none}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border)}
+.btn-ghost:hover{background:var(--bg3);color:var(--text);border-color:var(--border2)}
+.btn-danger{background:var(--red-bg);color:var(--red);border:1px solid rgba(239,68,68,.2)}
+.btn-danger:hover{background:rgba(239,68,68,.2)}
+.btn-sm{padding:6px 12px;font-size:13px}
+.btn-icon{padding:8px;border-radius:8px}
+
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;font-family:var(--font-head);letter-spacing:.04em;text-transform:uppercase}
+.badge-ct1,.badge-ct2{background:var(--amber-bg);color:var(--amber)}
+.badge-fat{background:var(--teal-bg);color:var(--teal)}
+.badge-notes{background:var(--green-bg);color:var(--green)}
+.badge-answer,.badge-answerscript{background:var(--accent-bg);color:var(--accent2)}
+.badge-lab    { background: rgba(20,184,166,0.1);   color: #14b8a6; }
+.badge-qp     { background: rgba(124,111,255,0.12); color: #a899ff; }
+.badge-report { background: rgba(245,158,11,0.1);   color: #f59e0b; }
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px}
+
+.form-label{display:block;font-size:12px;font-weight:500;color:var(--text2);margin-bottom:6px;font-family:var(--font-head);letter-spacing:.03em;text-transform:uppercase}
+.form-group{display:flex;flex-direction:column}
+
+.spinner{width:30px;height:30px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:60px auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+.fade-in{animation:fadeIn .25s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+.skeleton{background:linear-gradient(90deg,var(--bg2) 25%,var(--bg3) 50%,var(--bg2) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:var(--radius-lg)}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+.empty-state{text-align:center;padding:60px 20px;color:var(--text3)}
+.empty-state h3{font-size:17px;color:var(--text2);margin-bottom:6px}
