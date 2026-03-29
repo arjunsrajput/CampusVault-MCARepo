@@ -494,7 +494,7 @@ export default function UploadPage() {
             </span>
           </label>
           <input
-            placeholder="unit 3, ER diagram, normalization, scored 18/20"
+            placeholder=" Section A/B, CT1/CT2/FAT, Question Paper/AnswerScript/Notes, Jan 2025 (Exam Month)"
             value={form.tags}
             onChange={(e) => set("tags", e.target.value)}
             required
