@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { getSubjects, uploadMaterial } from "../api/index.js";
 import { useMaterialStore } from "../store/materialStore.js";
@@ -12,8 +12,12 @@ import {
   YEAR_TO_SEMESTERS,
   BATCHES,
 } from "../utils/constants.js";
+
 export default function UploadPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const preset = location.state;
+
   const { addMaterial } = useMaterialStore();
   const user = useAuthStore((s) => s.user);
   const [loading, setLoading] = useState(false);
@@ -23,29 +27,19 @@ export default function UploadPage() {
   const [showSubjectList, setShowSubjectList] = useState(false);
   const subjectBoxRef = useRef(null);
 
-  // const [form, setForm] = useState({
-  //   title: "",
-  //   batch: user?.batch || "",
-  //   mcaYear: user?.currentYear || "",
-  //   semester: "",
-  //   subject: "",
-  //   examType: "",
-  //   tags: "",
-  //   description: "",
-  // });
-
   const [form, setForm] = useState({
     title: "",
     batch: user?.batch || "",
-    mcaYear: user?.currentYear || "",
-    semester: "",
-    subject: "",
-    exam: "",
-    materialType: "",
+    mcaYear: preset?.mcaYear || user?.currentYear || "",
+    semester: preset?.semester || "",
+    subject: preset?.subject || "",
+    exam: preset?.exam || "",
+    materialType: preset?.materialType || "",
     faculty: "",
     tags: "",
     description: "",
   });
+
   const set = (k, v) => setForm((p) => ({ ...p, [k]: v }));
 
   const semesters = form.mcaYear
@@ -71,16 +65,18 @@ export default function UploadPage() {
 
       const aMatchesSemester = Number(form.semester) === a.semester;
       const bMatchesSemester = Number(form.semester) === b.semester;
-      if (aMatchesSemester !== bMatchesSemester) return aMatchesSemester ? -1 : 1;
+      if (aMatchesSemester !== bMatchesSemester)
+        return aMatchesSemester ? -1 : 1;
 
       return a.name.localeCompare(b.name);
     });
 
     if (!query) return rankedSubjects;
 
-    return rankedSubjects.filter((subject) =>
-      subject.name.toLowerCase().includes(query) ||
-      subject.code?.toLowerCase().includes(query),
+    return rankedSubjects.filter(
+      (subject) =>
+        subject.name.toLowerCase().includes(query) ||
+        subject.code?.toLowerCase().includes(query),
     );
   }, [availableSubjects, form.mcaYear, form.semester, form.subject]);
 
@@ -115,8 +111,9 @@ export default function UploadPage() {
       !form.tags.trim() ||
       !form.exam ||
       !form.materialType
-    )
+    ) {
       return toast.error("All fields are required");
+    }
 
     setLoading(true);
     try {
@@ -150,13 +147,17 @@ export default function UploadPage() {
         <p style={{ color: "var(--text3)", fontSize: 14 }}>
           Share past papers, notes and answer scripts with your batch
         </p>
+        {preset && (
+          <p style={{ color: "var(--accent2)", fontSize: 13, marginTop: 8 }}>
+            Prefilled from gaps contribution
+          </p>
+        )}
       </div>
 
       <form
         onSubmit={handleSubmit}
         style={{ display: "flex", flexDirection: "column", gap: 20 }}
       >
-        {/* File drop zone */}
         <div
           onDragOver={(e) => {
             e.preventDefault();
@@ -224,18 +225,19 @@ export default function UploadPage() {
           )}
         </div>
 
-        {/* Title */}
         <div className="form-group">
           <label className="form-label">Title</label>
           <input
-            placeholder="e.g. DBMS FAT Paper November 2024"
+            placeholder="e.g. FAT Paper Section A/B"
             value={form.title}
             onChange={(e) => set("title", e.target.value)}
             required
           />
+          <p style={{ fontSize: 12, color: "var(--text3)", marginTop: 5 }}>
+            Example: FAT Paper Section A or CT2 Answer Script Section B
+          </p>
         </div>
 
-        {/* Batch + Year */}
         <div
           style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}
         >
@@ -254,6 +256,7 @@ export default function UploadPage() {
               ))}
             </select>
           </div>
+
           <div className="form-group">
             <label className="form-label">MCA year</label>
             <select
@@ -275,10 +278,7 @@ export default function UploadPage() {
           </div>
         </div>
 
-        {/* Semester */}
-        <div
-          style={{ display: "grid", gridTemplateColumns: "1fr", gap: 12 }}
-        >
+        <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 12 }}>
           <div className="form-group">
             <label className="form-label">Semester</label>
             <select
@@ -299,7 +299,6 @@ export default function UploadPage() {
           </div>
         </div>
 
-        {/* Subject */}
         <div className="form-group" ref={subjectBoxRef}>
           <label className="form-label">Subject</label>
           <div style={{ position: "relative" }}>
@@ -332,7 +331,11 @@ export default function UploadPage() {
               >
                 {suggestedSubjects.map((subject) => (
                   <button
-                    key={subject._id || subject.code || `${subject.name}-${subject.semester}`}
+                    key={
+                      subject._id ||
+                      subject.code ||
+                      `${subject.name}-${subject.semester}`
+                    }
                     type="button"
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => {
@@ -354,14 +357,28 @@ export default function UploadPage() {
                           : "var(--text)",
                     }}
                   >
-                    <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        gap: 12,
+                      }}
+                    >
                       <span>{subject.name}</span>
                       <span style={{ color: "var(--text3)", fontSize: 12 }}>
-                        {subject.code || `Y${subject.mcaYear} S${subject.semester}`}
+                        {subject.code ||
+                          `Y${subject.mcaYear} S${subject.semester}`}
                       </span>
                     </div>
-                    <div style={{ fontSize: 11, color: "var(--text3)", marginTop: 3 }}>
-                      Year {subject.mcaYear} · Semester {subject.semester} · {subject.type || "theory"}
+                    <div
+                      style={{
+                        fontSize: 11,
+                        color: "var(--text3)",
+                        marginTop: 3,
+                      }}
+                    >
+                      Year {subject.mcaYear} · Semester {subject.semester} ·{" "}
+                      {subject.type || "theory"}
                     </div>
                   </button>
                 ))}
@@ -369,11 +386,11 @@ export default function UploadPage() {
             )}
           </div>
           <p style={{ fontSize: 12, color: "var(--text3)", marginTop: 5 }}>
-            Search by subject name or code, or keep typing to add a custom subject
+            Search by subject name or code or add a custom/new
+            subject, if it not exist (Write full name).
           </p>
         </div>
 
-        {/* Faculty */}
         <div className="form-group">
           <label className="form-label">Faculty name</label>
           <input
@@ -382,13 +399,11 @@ export default function UploadPage() {
             onChange={(e) => set("faculty", e.target.value)}
           />
           <p style={{ fontSize: 12, color: "var(--text3)", marginTop: 5 }}>
-            Professor who taught this subject — helps students find relevant
-            papers
+            Professor who taught this subject : helps students find relevant
+            paper
           </p>
         </div>
 
-        {/* Exam type */}
-        {/* Exam */}
         <div className="form-group">
           <label className="form-label">Exam</label>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -420,7 +435,6 @@ export default function UploadPage() {
           </div>
         </div>
 
-        {/* Material type — options change based on selected exam */}
         {form.exam && (
           <div className="form-group">
             <label className="form-label">Material type</label>
@@ -466,7 +480,6 @@ export default function UploadPage() {
           </div>
         )}
 
-        {/* Tags */}
         <div className="form-group">
           <label className="form-label">
             Tags{" "}
@@ -486,9 +499,12 @@ export default function UploadPage() {
             onChange={(e) => set("tags", e.target.value)}
             required
           />
+          <p style={{ fontSize: 12, color: "var(--text3)", marginTop: 5 }}>
+            Example: Section A/B, CT1/CT2/FAT, Question Paper/AnswerScript/Notes,
+            Jan 2025 (Exam Month), Topic Name, Unit No.
+          </p>
         </div>
 
-        {/* Description */}
         <div className="form-group">
           <label className="form-label">
             Description{" "}
