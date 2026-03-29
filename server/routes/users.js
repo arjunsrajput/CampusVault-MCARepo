@@ -1,26 +1,37 @@
-import express from 'express'
-import User from '../models/User.js'
-import Material from '../models/Material.js'
-import { protect } from '../middleware/auth.js'
+import express from "express";
+import User from "../models/User.js";
+import Material from "../models/Material.js";
+import { protect } from "../middleware/auth.js";
 
-const router = express.Router()
-const normalizeName = (value) => value?.trim().replace(/\s+/g, ' ').toUpperCase()
-const trimValue = (value) => value === undefined || value === null ? '' : String(value).trim()
-const profileFields = 'name batch rollNumber currentYear role email isAlumni graduationYear company jobTitle city linkedinUrl personalEmail bio directoryVisibility showEmail showLinkedin uploadCount'
+const router = express.Router();
+const normalizeName = (value) =>
+  value?.trim().replace(/\s+/g, " ").toUpperCase();
+const trimValue = (value) =>
+  value === undefined || value === null ? "" : String(value).trim();
+const profileFields =
+  "name batch rollNumber currentYear role email isAlumni graduationYear company jobTitle city linkedinUrl personalEmail bio directoryVisibility showEmail showLinkedin uploadCount";
 
 const canViewerSeeUser = (viewer, member) => {
-  if (member.directoryVisibility === 'hidden') return false
-  if (member.directoryVisibility === 'same_batch' && viewer.batch !== member.batch) return false
-  return true
-}
+  if (member.directoryVisibility === "hidden") return false;
+  if (
+    member.directoryVisibility === "same_batch" &&
+    viewer.batch !== member.batch
+  )
+    return false;
+  return true;
+};
 
 const sanitizeDirectoryMember = async (viewer, member) => {
-  const uploads = await Material.countDocuments({ uploadedBy: member._id })
+  const uploads = await Material.countDocuments({
+    uploadedBy: member._id,
+    isDeleted: false,
+  });
+
   const upvoteAgg = await Material.aggregate([
     { $match: { uploadedBy: member._id, isDeleted: false } },
-    { $group: { _id: null, total: { $sum: '$upvotes' } } }
-  ])
-  const upvotesReceived = upvoteAgg[0]?.total || 0
+    { $group: { _id: null, total: { $sum: "$upvotes" } } },
+  ]);
+  const upvotesReceived = upvoteAgg[0]?.total || 0;
 
   return {
     id: member._id,
@@ -36,78 +47,143 @@ const sanitizeDirectoryMember = async (viewer, member) => {
     bio: member.bio,
     uploadCount: uploads,
     upvotesReceived,
-    linkedinUrl: member.showLinkedin ? member.linkedinUrl : '',
-    personalEmail: member.showEmail ? member.personalEmail : ''
-  }
-}
+    linkedinUrl: member.showLinkedin ? member.linkedinUrl : "",
+    personalEmail: member.showEmail ? member.personalEmail : "",
+  };
+};
 
 // GET /api/users/leaderboard
-router.get('/leaderboard', protect, async (req, res) => {
+// router.get('/leaderboard', protect, async (req, res) => {
+//   try {
+//     const users = await User.find({ uploadCount: { $gt: 0 } })
+//       .select('name batch rollNumber uploadCount')
+//       .sort({ uploadCount: -1 })
+//       .limit(20)
+//     res.json({ users })
+//   } catch (err) {
+//     res.status(500).json({ error: err.message })
+//   }
+// })
+// GET /api/users/leaderboard
+router.get("/leaderboard", protect, async (req, res) => {
   try {
-    const users = await User.find({ uploadCount: { $gt: 0 } })
-      .select('name batch rollNumber uploadCount')
-      .sort({ uploadCount: -1 })
-      .limit(20)
-    res.json({ users })
+    const users = await Material.aggregate([
+      {
+        $match: {
+          isDeleted: false,
+          uploadedBy: { $ne: null },
+        },
+      },
+      {
+        $group: {
+          _id: "$uploadedBy",
+          uploadCount: { $sum: 1 },
+          totalDownloads: { $sum: "$downloads" },
+          totalUpvotes: { $sum: "$upvotes" },
+        },
+      },
+      {
+        $sort: {
+          uploadCount: -1,
+          totalUpvotes: -1,
+          totalDownloads: -1,
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "_id",
+          foreignField: "_id",
+          as: "user",
+        },
+      },
+      {
+        $unwind: "$user",
+      },
+      {
+        $project: {
+          _id: "$user._id",
+          name: "$user.name",
+          batch: "$user.batch",
+          rollNumber: "$user.rollNumber",
+          uploadCount: 1,
+          totalDownloads: 1,
+          totalUpvotes: 1,
+        },
+      },
+      {
+        $limit: 20,
+      },
+    ]);
+
+    res.json({ users });
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    res.status(500).json({ error: err.message });
   }
-})
+});
 
 // GET /api/users/my-uploads
-router.get('/my-uploads', protect, async (req, res) => {
+router.get("/my-uploads", protect, async (req, res) => {
   try {
-    const materials = await Material.find({ uploadedBy: req.user._id })
-      .sort({ createdAt: -1 })
-    res.json({ materials })
+    const materials = await Material.find({ uploadedBy: req.user._id }).sort({
+      createdAt: -1,
+    });
+    res.json({ materials });
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    res.status(500).json({ error: err.message });
   }
-})
+});
 
 // GET /api/users/directory/batches
-router.get('/directory/batches', protect, async (req, res) => {
+router.get("/directory/batches", protect, async (req, res) => {
   try {
-    const users = await User.find({ directoryVisibility: { $ne: 'hidden' } })
-      .select('batch directoryVisibility')
+    const users = await User.find({
+      directoryVisibility: { $ne: "hidden" },
+    }).select("batch directoryVisibility");
 
-    const visibleUsers = users.filter((user) => canViewerSeeUser(req.user, user))
+    const visibleUsers = users.filter((user) =>
+      canViewerSeeUser(req.user, user),
+    );
     const batchMap = visibleUsers.reduce((acc, user) => {
-      acc[user.batch] = (acc[user.batch] || 0) + 1
-      return acc
-    }, {})
+      acc[user.batch] = (acc[user.batch] || 0) + 1;
+      return acc;
+    }, {});
 
     const batches = Object.keys(batchMap)
-      .sort((a, b) => Number(b.split('-')[0]) - Number(a.split('-')[0]))
-      .map((batch) => ({ batch, memberCount: batchMap[batch] }))
+      .sort((a, b) => Number(b.split("-")[0]) - Number(a.split("-")[0]))
+      .map((batch) => ({ batch, memberCount: batchMap[batch] }));
 
-    res.json({ batches })
+    res.json({ batches });
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    res.status(500).json({ error: err.message });
   }
-})
+});
 
 // GET /api/users/directory/batches/:batch
-router.get('/directory/batches/:batch', protect, async (req, res) => {
+router.get("/directory/batches/:batch", protect, async (req, res) => {
   try {
     const users = await User.find({ batch: req.params.batch })
       .select(profileFields)
-      .sort({ rollNumber: 1, name: 1 })
+      .sort({ rollNumber: 1, name: 1 });
 
-    const visibleUsers = users.filter((user) => canViewerSeeUser(req.user, user))
-    const members = await Promise.all(visibleUsers.map((user) => sanitizeDirectoryMember(req.user, user)))
+    const visibleUsers = users.filter((user) =>
+      canViewerSeeUser(req.user, user),
+    );
+    const members = await Promise.all(
+      visibleUsers.map((user) => sanitizeDirectoryMember(req.user, user)),
+    );
 
     res.json({
       batch: req.params.batch,
-      members
-    })
+      members,
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    res.status(500).json({ error: err.message });
   }
-})
+});
 
 // PATCH /api/users/profile
-router.patch('/profile', protect, async (req, res) => {
+router.patch("/profile", protect, async (req, res) => {
   try {
     const {
       name,
@@ -123,8 +199,8 @@ router.patch('/profile', protect, async (req, res) => {
       bio,
       directoryVisibility,
       showEmail,
-      showLinkedin
-    } = req.body
+      showLinkedin,
+    } = req.body;
 
     const user = await User.findByIdAndUpdate(
       req.user._id,
@@ -133,19 +209,27 @@ router.patch('/profile', protect, async (req, res) => {
         ...(batch && { batch }),
         ...(currentYear && { currentYear: Number(currentYear) }),
         ...(isAlumni !== undefined && { isAlumni: Boolean(isAlumni) }),
-        ...(graduationYear !== undefined && { graduationYear: graduationYear ? Number(graduationYear) : null }),
+        ...(graduationYear !== undefined && {
+          graduationYear: graduationYear ? Number(graduationYear) : null,
+        }),
         ...(company !== undefined && { company: trimValue(company) }),
         ...(jobTitle !== undefined && { jobTitle: trimValue(jobTitle) }),
         ...(city !== undefined && { city: trimValue(city) }),
-        ...(linkedinUrl !== undefined && { linkedinUrl: trimValue(linkedinUrl) }),
-        ...(personalEmail !== undefined && { personalEmail: trimValue(personalEmail).toLowerCase() }),
+        ...(linkedinUrl !== undefined && {
+          linkedinUrl: trimValue(linkedinUrl),
+        }),
+        ...(personalEmail !== undefined && {
+          personalEmail: trimValue(personalEmail).toLowerCase(),
+        }),
         ...(bio !== undefined && { bio: trimValue(bio) }),
         ...(directoryVisibility !== undefined && { directoryVisibility }),
         ...(showEmail !== undefined && { showEmail: Boolean(showEmail) }),
-        ...(showLinkedin !== undefined && { showLinkedin: Boolean(showLinkedin) })
+        ...(showLinkedin !== undefined && {
+          showLinkedin: Boolean(showLinkedin),
+        }),
       },
-      { new: true, runValidators: true }
-    )
+      { new: true, runValidators: true },
+    );
     res.json({
       user: {
         id: user._id,
@@ -166,44 +250,46 @@ router.patch('/profile', protect, async (req, res) => {
         directoryVisibility: user.directoryVisibility,
         showEmail: user.showEmail,
         showLinkedin: user.showLinkedin,
-        uploadCount: user.uploadCount
-      }
-    })
+        uploadCount: user.uploadCount,
+      },
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    res.status(500).json({ error: err.message });
   }
-})
+});
 
 // POST /api/users/save/:materialId
-router.post('/save/:materialId', protect, async (req, res) => {
+router.post("/save/:materialId", protect, async (req, res) => {
   try {
-    const user = await User.findById(req.user._id)
-    const mid = req.params.materialId
-    const alreadySaved = user.savedMaterials.map(id => id.toString()).includes(mid)
+    const user = await User.findById(req.user._id);
+    const mid = req.params.materialId;
+    const alreadySaved = user.savedMaterials
+      .map((id) => id.toString())
+      .includes(mid);
 
     if (alreadySaved) {
-      user.savedMaterials.pull(mid)
+      user.savedMaterials.pull(mid);
     } else {
-      user.savedMaterials.push(mid)
+      user.savedMaterials.push(mid);
     }
-    await user.save()
-    res.json({ saved: !alreadySaved, count: user.savedMaterials.length })
+    await user.save();
+    res.json({ saved: !alreadySaved, count: user.savedMaterials.length });
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    res.status(500).json({ error: err.message });
   }
-})
+});
 
 // GET /api/users/saved
-router.get('/saved', protect, async (req, res) => {
+router.get("/saved", protect, async (req, res) => {
   try {
     const user = await User.findById(req.user._id).populate({
-      path: 'savedMaterials',
-      populate: { path: 'uploadedBy', select: 'name' }
-    })
-    res.json({ materials: user.savedMaterials })
+      path: "savedMaterials",
+      populate: { path: "uploadedBy", select: "name" },
+    });
+    res.json({ materials: user.savedMaterials });
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    res.status(500).json({ error: err.message });
   }
-})
+});
 
-export default router
+export default router;
