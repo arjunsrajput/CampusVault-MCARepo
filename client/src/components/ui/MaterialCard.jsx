@@ -99,9 +99,7 @@ export default function MaterialCard({ material, showDelete = false }) {
         gap: 10,
         minHeight: 350,
         transition: "border-color .15s, background .15s",
-        cursor: "pointer",
       }}
-      onClick={() => navigate(`/material/${material._id}`)}
       onMouseEnter={(e) => {
         e.currentTarget.style.borderColor = "var(--border2)";
         e.currentTarget.style.background = "var(--bg3)";
@@ -112,133 +110,143 @@ export default function MaterialCard({ material, showDelete = false }) {
       }}
     >
       <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 6,
-          flexWrap: "wrap",
-          minHeight: 28,
-        }}
-      >
-        <span className={`badge ${examBadge}`}>
-          {material.exam || material.examType}
-        </span>
-
-        {typeBadge && material.materialType && (
-          <span className={`badge ${typeBadge}`}>
-            {material.materialType === "QuestionPaper"
-              ? "Question Paper"
-              : material.materialType === "AnswerScript"
-                ? "Answer Script"
-                : material.materialType === "LabRecord"
-                  ? "Lab Record"
-                  : material.materialType}
-          </span>
-        )}
-
-        <span
-          style={{ marginLeft: "auto", fontSize: 11, color: "var(--text3)" }}
-        >
-          {formatDate(material.createdAt)}
-        </span>
-      </div>
-
-      <p
-        style={{
-          fontSize: 15,
-          fontWeight: 600,
-          color: "var(--accent2)",
-          lineHeight: 1.35,
-          fontFamily: "var(--font-head)",
-          letterSpacing: "-0.02em",
-          minHeight: 20,
-        }}
-      >
-        {material.subject}
-      </p>
-
-      <h3
-        style={{
-          fontSize: 14,
-          fontWeight: 700,
-          color: "var(--text)",
-          lineHeight: 1.35,
-          fontFamily: "var(--font-head)",
-          minHeight: 38,
-          display: "-webkit-box",
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: "vertical",
-          overflow: "hidden",
-        }}
-      >
-        {material.title}
-      </h3>
-
-      <div
+        onClick={() => navigate(`/material/${material._id}`)}
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: 4,
-          minHeight: 42,
+          gap: 10,
+          cursor: "pointer",
         }}
       >
-        <p style={{ fontSize: 12, color: "var(--text3)" }}>
-          Batch {material.batch} · Year {material.mcaYear} · Sem{" "}
-          {material.semester}
-        </p>
-        <p
+        <div
           style={{
-            fontSize: 12,
-            color: uploaderLine ? "var(--text2)" : "var(--text3)",
-            minHeight: 18,
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            flexWrap: "wrap",
+            minHeight: 28,
           }}
         >
-          {uploaderLine || " "}
-        </p>
-      </div>
+          <span className={`badge ${examBadge}`}>
+            {material.exam || material.examType}
+          </span>
 
-      {material.faculty ? (
+          {typeBadge && material.materialType && (
+            <span className={`badge ${typeBadge}`}>
+              {material.materialType === "QuestionPaper"
+                ? "Question Paper"
+                : material.materialType === "AnswerScript"
+                  ? "Answer Script"
+                  : material.materialType === "LabRecord"
+                    ? "Lab Record"
+                    : material.materialType}
+            </span>
+          )}
+
+          <span
+            style={{ marginLeft: "auto", fontSize: 11, color: "var(--text3)" }}
+          >
+            {formatDate(material.createdAt)}
+          </span>
+        </div>
+
         <p
           style={{
-            fontSize: 12,
-            color: "var(--text3)",
-            minHeight: 18,
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
+            fontSize: 15,
+            fontWeight: 600,
+            color: "var(--accent2)",
+            lineHeight: 1.35,
+            fontFamily: "var(--font-head)",
+            letterSpacing: "-0.02em",
+            minHeight: 20,
           }}
         >
-          <span style={{ color: "var(--text2)" }}>Faculty:</span>{" "}
-          {material.faculty}
+          {material.subject}
         </p>
-      ) : (
-        <div style={{ minHeight: 18 }} />
-      )}
 
-      <div style={{ minHeight: 34 }}>
-        {material.tags?.length > 0 && (
-          <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
-            {material.tags.slice(0, 3).map((tag) => (
-              <span
-                key={tag}
-                style={{
-                  background: "var(--bg)",
-                  border: "1px solid var(--border)",
-                  color: "var(--text3)",
-                  fontSize: 11,
-                  padding: "2px 8px",
-                  borderRadius: 20,
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
+        <h3
+          style={{
+            fontSize: 14,
+            fontWeight: 700,
+            color: "var(--text)",
+            lineHeight: 1.35,
+            fontFamily: "var(--font-head)",
+            minHeight: 38,
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden",
+          }}
+        >
+          {material.title}
+        </h3>
+
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 4,
+            minHeight: 42,
+          }}
+        >
+          <p style={{ fontSize: 12, color: "var(--text3)" }}>
+            Batch {material.batch} · Year {material.mcaYear} · Sem{" "}
+            {material.semester}
+          </p>
+          <p
+            style={{
+              fontSize: 12,
+              color: uploaderLine ? "var(--text2)" : "var(--text3)",
+              minHeight: 18,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {uploaderLine || " "}
+          </p>
+        </div>
+
+        {material.faculty ? (
+          <p
+            style={{
+              fontSize: 12,
+              color: "var(--text3)",
+              minHeight: 18,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            <span style={{ color: "var(--text2)" }}>Faculty:</span>{" "}
+            {material.faculty}
+          </p>
+        ) : (
+          <div style={{ minHeight: 18 }} />
         )}
+
+        <div style={{ minHeight: 34 }}>
+          {material.tags?.length > 0 && (
+            <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+              {material.tags.slice(0, 3).map((tag) => (
+                <span
+                  key={tag}
+                  style={{
+                    background: "var(--bg)",
+                    border: "1px solid var(--border)",
+                    color: "var(--text3)",
+                    fontSize: 11,
+                    padding: "2px 8px",
+                    borderRadius: 20,
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       <div style={{ marginTop: "auto" }} />
