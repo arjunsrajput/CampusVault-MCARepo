@@ -99,7 +99,9 @@ export default function MaterialCard({ material, showDelete = false }) {
         gap: 10,
         minHeight: 350,
         transition: "border-color .15s, background .15s",
+        cursor: "pointer",
       }}
+      onClick={() => navigate(`/material/${material._id}`)}
       onMouseEnter={(e) => {
         e.currentTarget.style.borderColor = "var(--border2)";
         e.currentTarget.style.background = "var(--bg3)";
@@ -156,14 +158,12 @@ export default function MaterialCard({ material, showDelete = false }) {
       </p>
 
       <h3
-        onClick={() => navigate(`/material/${material._id}`)}
         style={{
           fontSize: 14,
           fontWeight: 700,
           color: "var(--text)",
           lineHeight: 1.35,
           fontFamily: "var(--font-head)",
-          cursor: "pointer",
           minHeight: 38,
           display: "-webkit-box",
           WebkitLineClamp: 2,
@@ -313,8 +313,12 @@ export default function MaterialCard({ material, showDelete = false }) {
             e.currentTarget.style.borderColor = "var(--amber-dim)";
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.color = saved ? "var(--amber)" : "var(--text3)";
-            e.currentTarget.style.borderColor = saved ? "var(--amber-dim)" : "var(--border)";
+            e.currentTarget.style.color = saved
+              ? "var(--amber)"
+              : "var(--text3)";
+            e.currentTarget.style.borderColor = saved
+              ? "var(--amber-dim)"
+              : "var(--border)";
           }}
         >
           {saved ? "♥ Saved" : "♡ Save"}
