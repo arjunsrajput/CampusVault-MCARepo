@@ -125,7 +125,14 @@ export default function UploadPage() {
       const res = await uploadMaterial(fd);
       addMaterial(res.data.material);
       toast.success("Material uploaded successfully!");
-      navigate("/");
+
+      setFile(null);
+      setForm((prev) => ({
+        ...prev,
+        title: "",
+        description: "",
+      }));
+
     } catch (err) {
       const msg = err.response?.data?.error || "Upload failed";
       if (err.response?.status === 409) {
