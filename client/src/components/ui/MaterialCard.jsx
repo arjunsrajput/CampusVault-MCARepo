@@ -276,7 +276,7 @@ export default function MaterialCard({ material, showDelete = false }) {
             transition: "all .12s",
           }}
         >
-          ▲ {material.upvotes || 0}
+          ▲ {material.upvotes || 0} Upvotes
         </button>
 
         <button
@@ -304,7 +304,7 @@ export default function MaterialCard({ material, showDelete = false }) {
             e.currentTarget.style.borderColor = "var(--border)";
           }}
         >
-          ↓ {material.downloads || 0}
+          ↓ {material.downloads || 0} Downloads
         </button>
 
         <button
