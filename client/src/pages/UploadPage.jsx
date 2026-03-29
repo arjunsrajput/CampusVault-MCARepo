@@ -234,7 +234,7 @@ export default function UploadPage() {
             required
           />
           <p style={{ fontSize: 12, color: "var(--text3)", marginTop: 5 }}>
-            Example: FAT Paper Section A or CT2 Answer Script Section B
+            Example: FAT Paper Section A or CT2 Answer Script Section B, Machine Learning Unit 1 Notes
           </p>
         </div>
 

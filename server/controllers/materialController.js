@@ -119,7 +119,9 @@ export const createMaterial = async (req, res) => {
       !exam ||
       !materialType
     ) {
-      return res.status(400).json({ error: "All required fields must be filled." });
+      return res
+        .status(400)
+        .json({ error: "All required fields must be filled." });
     }
     if (!req.file) {
       return res.status(400).json({ error: "PDF file is required." });
@@ -133,18 +135,52 @@ export const createMaterial = async (req, res) => {
     //   subject,
     //   examType,
     // });
-    const existing = await Material.findOne({
-      batch,
-      mcaYear: Number(mcaYear),
-      semester: Number(semester),
-      subject,
-      exam,
-      materialType,
-    });
+    // const existing = await Material.findOne({
+    //   batch,
+    //   mcaYear: Number(mcaYear),
+    //   semester: Number(semester),
+    //   subject,
+    //   exam,
+    //   materialType,
+    // });
+    // if (existing) {
+    //   return res.status(409).json({
+    //     error:
+    //       "A material with this batch/year/sem/subject/type already exists.",
+    //     existingId: existing._id,
+    //   });
+    // }
+
+    const isGeneralNotes = exam === "General" && materialType === "Notes";
+
+    let existing = null;
+
+    if (isGeneralNotes) {
+      existing = await Material.findOne({
+        batch,
+        mcaYear: Number(mcaYear),
+        semester: Number(semester),
+        subject,
+        exam,
+        materialType,
+        title: title.trim(),
+      });
+    } else {
+      existing = await Material.findOne({
+        batch,
+        mcaYear: Number(mcaYear),
+        semester: Number(semester),
+        subject,
+        exam,
+        materialType,
+      });
+    }
+
     if (existing) {
       return res.status(409).json({
-        error:
-          "A material with this batch/year/sem/subject/type already exists.",
+        error: isGeneralNotes
+          ? "A notes file with the same title already exists for this subject."
+          : "A material with this batch/year/sem/subject/type already exists.",
         existingId: existing._id,
       });
     }
