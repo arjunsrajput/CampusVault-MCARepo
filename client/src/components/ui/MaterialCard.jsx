@@ -28,12 +28,14 @@ export default function MaterialCard({ material, showDelete = false }) {
   const saved = savedIds.has(material._id);
 
   const navigate = useNavigate();
-  // Support both old (examType) and new (exam + materialType) formats
+
   const examBadge =
     EXAM_BADGE[material.exam] ||
     EXAM_TYPE_BADGE[material.examType] ||
     "badge-notes";
+
   const typeBadge = MATERIAL_TYPE_BADGE[material.materialType] || null;
+
   const uploaderLine = [
     material.uploadedBy?.name,
     material.uploadedBy?.rollNumber,
@@ -191,7 +193,10 @@ export default function MaterialCard({ material, showDelete = false }) {
         >
           <p style={{ fontSize: 12, color: "var(--text3)" }}>
             Batch {material.batch} · Year {material.mcaYear} · Sem{" "}
-            {material.semester}
+            {material.semester} ·{" "}
+            {material.section === "A" || material.section === "B"
+              ? `Section ${material.section}`
+              : "Common"}
           </p>
           <p
             style={{
@@ -362,5 +367,3 @@ export default function MaterialCard({ material, showDelete = false }) {
     </div>
   );
 }
-
-// Note: import useNavigate at top and wrap title in onClick to navigate to /material/:id

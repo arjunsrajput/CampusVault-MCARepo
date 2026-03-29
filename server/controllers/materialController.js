@@ -4,17 +4,14 @@ import { cloudinary, uploadToCloudinary } from "../config/cloudinary.js";
 
 export const getAllMaterials = async (req, res) => {
   try {
-    // const materials = await Material.find(
-    //   {},
-    //   "title batch mcaYear semester subject examType tags description uploadedBy downloads upvotes createdAt fileUrl",
-    // )
     const materials = await Material.find(
       {},
-      "title batch mcaYear semester subject exam materialType faculty tags description uploadedBy downloads upvotes createdAt fileUrl",
+      "title batch mcaYear semester section subject exam materialType faculty tags description uploadedBy downloads upvotes createdAt fileUrl",
     )
       .populate("uploadedBy", "name batch rollNumber")
       .sort({ createdAt: -1 })
       .lean();
+
     res.json({ materials, total: materials.length });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -27,18 +24,21 @@ export const getMaterials = async (req, res) => {
       batch,
       mcaYear,
       semester,
+      section,
       subject,
-      examType,
+      exam,
+      materialType,
       q,
       sort = "newest",
       page = 1,
     } = req.query;
+
     const filter = {};
     if (batch) filter.batch = batch;
     if (mcaYear) filter.mcaYear = Number(mcaYear);
     if (semester) filter.semester = Number(semester);
+    if (section) filter.section = section;
     if (subject) filter.subject = subject;
-    // if (examType) filter.examType = examType;
     if (exam) filter.exam = exam;
     if (materialType) filter.materialType = materialType;
 
@@ -83,6 +83,7 @@ export const getMaterial = async (req, res) => {
     );
     if (!material)
       return res.status(404).json({ error: "Material not found." });
+
     res.json({ material });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -91,13 +92,12 @@ export const getMaterial = async (req, res) => {
 
 export const createMaterial = async (req, res) => {
   try {
-    // const { title, batch, mcaYear, semester, subject, examType, tags, description } = req.body
-    // const { title, batch, mcaYear, semester, subject, examType, faculty, tags, description } = req.body
     const {
       title,
       batch,
       mcaYear,
       semester,
+      section,
       subject,
       exam,
       materialType,
@@ -106,14 +106,12 @@ export const createMaterial = async (req, res) => {
       description,
     } = req.body;
 
-    // if (!title || !batch || !mcaYear || !semester || !subject || !examType) {
-    //   return res.status(400).json({ error: 'All fields except tags are required.' })
-    // }
     if (
       !title ||
       !batch ||
       !mcaYear ||
       !semester ||
+      !section ||
       !subject ||
       !tags ||
       !exam ||
@@ -123,33 +121,10 @@ export const createMaterial = async (req, res) => {
         .status(400)
         .json({ error: "All required fields must be filled." });
     }
+
     if (!req.file) {
       return res.status(400).json({ error: "PDF file is required." });
     }
-
-    // Check duplicate
-    // const existing = await Material.findOne({
-    //   batch,
-    //   mcaYear: Number(mcaYear),
-    //   semester: Number(semester),
-    //   subject,
-    //   examType,
-    // });
-    // const existing = await Material.findOne({
-    //   batch,
-    //   mcaYear: Number(mcaYear),
-    //   semester: Number(semester),
-    //   subject,
-    //   exam,
-    //   materialType,
-    // });
-    // if (existing) {
-    //   return res.status(409).json({
-    //     error:
-    //       "A material with this batch/year/sem/subject/type already exists.",
-    //     existingId: existing._id,
-    //   });
-    // }
 
     const isGeneralNotes = exam === "General" && materialType === "Notes";
 
@@ -160,6 +135,7 @@ export const createMaterial = async (req, res) => {
         batch,
         mcaYear: Number(mcaYear),
         semester: Number(semester),
+        section,
         subject,
         exam,
         materialType,
@@ -170,6 +146,7 @@ export const createMaterial = async (req, res) => {
         batch,
         mcaYear: Number(mcaYear),
         semester: Number(semester),
+        section,
         subject,
         exam,
         materialType,
@@ -185,7 +162,6 @@ export const createMaterial = async (req, res) => {
       });
     }
 
-    // Upload buffer to Cloudinary
     const { url, public_id } = await uploadToCloudinary(
       req.file.buffer,
       req.file.originalname,
@@ -202,25 +178,12 @@ export const createMaterial = async (req, res) => {
       return res.status(400).json({ error: "At least one tag is required." });
     }
 
-    // const material = await Material.create({
-    //   title,
-    //   batch,
-    //   mcaYear: Number(mcaYear),
-    //   semester: Number(semester),
-    //   subject,
-    //   faculty,
-    //   examType,
-    //   tags: parsedTags,
-    //   description,
-    //   fileUrl: url,
-    //   publicId: public_id,
-    //   uploadedBy: req.user._id,
-    // });
     const material = await Material.create({
       title,
       batch,
       mcaYear: Number(mcaYear),
       semester: Number(semester),
+      section,
       subject,
       exam,
       materialType,
@@ -233,10 +196,12 @@ export const createMaterial = async (req, res) => {
     });
 
     await User.findByIdAndUpdate(req.user._id, { $inc: { uploadCount: 1 } });
+
     const populated = await material.populate(
       "uploadedBy",
       "name batch rollNumber",
     );
+
     res.status(201).json({ material: populated });
   } catch (err) {
     console.error("Upload error:", err.message);
@@ -250,17 +215,6 @@ export const createMaterial = async (req, res) => {
   }
 };
 
-// export const trackDownload = async (req, res) => {
-//   try {
-//     const material = await Material.findByIdAndUpdate(
-//       req.params.id, { $inc: { downloads: 1 } }, { new: true }
-//     )
-//     if (!material) return res.status(404).json({ error: 'Material not found.' })
-//     res.json({ downloads: material.downloads, fileUrl: material.fileUrl })
-//   } catch (err) {
-//     res.status(500).json({ error: err.message })
-//   }
-// }
 export const trackDownload = async (req, res) => {
   try {
     const material = await Material.findByIdAndUpdate(
@@ -268,10 +222,10 @@ export const trackDownload = async (req, res) => {
       { $inc: { downloads: 1 } },
       { new: true },
     );
+
     if (!material)
       return res.status(404).json({ error: "Material not found." });
 
-    // Convert Cloudinary URL to a forced-download URL
     const downloadUrl = material.fileUrl.replace(
       "/upload/",
       "/upload/fl_attachment/",
@@ -321,8 +275,10 @@ export const flagMaterial = async (req, res) => {
       },
       { new: true },
     );
+
     if (!material)
       return res.status(404).json({ error: "Material not found." });
+
     res.json({ message: "Material flagged for review." });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -352,11 +308,20 @@ export const deleteMaterial = async (req, res) => {
       console.warn("Cloudinary delete failed:", cloudErr.message);
     }
 
-    material.isDeleted = true;
-    await material.save();
+    // material.isDeleted = true;
+    // await material.save();
+
+    // await User.findByIdAndUpdate(material.uploadedBy, {
+    //   $inc: { uploadCount: -1 },
+    // });
+
+    // res.json({ message: "Material deleted successfully." });
+    await Material.findByIdAndDelete(req.params.id);
+
     await User.findByIdAndUpdate(material.uploadedBy, {
       $inc: { uploadCount: -1 },
     });
+
     res.json({ message: "Material deleted successfully." });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -387,6 +352,7 @@ export const getGaps = async (req, res) => {
       },
       { $sort: { "_id.subject": 1 } },
     ];
+
     const existing = await Material.aggregate(pipeline);
     res.json({ gaps: existing });
   } catch (err) {

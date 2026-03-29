@@ -18,33 +18,33 @@ export default function BrowsePage() {
   const [batch, setBatch] = useState("");
   const [year, setYear] = useState("");
   const [semester, setSemester] = useState("");
+  const [section, setSection] = useState("");
   const [subject, setSubject] = useState("");
   const [exam, setExam] = useState("");
   const [materialType, setMaterialType] = useState("");
   const [sort, setSort] = useState("newest");
 
-  // useEffect(() => {
-  //   if (user?.currentYear) setYear(String(user.currentYear))
-  //   if (user?.batch)       setBatch(user.batch)
-  // }, [user])
-
   const subjects = useMemo(
     () => [...new Set(all.map((m) => m.subject))].sort(),
     [all],
   );
+
   const availableSems = year
     ? YEAR_TO_SEMESTERS[Number(year)] || SEMESTERS
     : SEMESTERS;
 
   const filtered = useMemo(() => {
     let list = all;
+
     if (batch) list = list.filter((m) => m.batch === batch);
     if (year) list = list.filter((m) => m.mcaYear === Number(year));
     if (semester) list = list.filter((m) => m.semester === Number(semester));
+    if (section) list = list.filter((m) => (m.section || "Common") === section);
     if (subject) list = list.filter((m) => m.subject === subject);
     if (exam) list = list.filter((m) => m.exam === exam);
     if (materialType)
       list = list.filter((m) => m.materialType === materialType);
+
     if (search.trim()) {
       const q = search.toLowerCase();
       list = list.filter(
@@ -56,26 +56,37 @@ export default function BrowsePage() {
           m.uploadedBy?.name?.toLowerCase().includes(q),
       );
     }
+
     const fns = {
       newest: (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
       oldest: (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
       popular: (a, b) => (b.downloads || 0) - (a.downloads || 0),
       upvoted: (a, b) => (b.upvotes || 0) - (a.upvotes || 0),
     };
+
     return [...list].sort(fns[sort] || fns.newest);
-  }, [all, batch, year, semester, subject, exam, materialType, search, sort]);
+  }, [all, batch, year, semester, section, subject, exam, materialType, search, sort]);
 
   const clearFilters = () => {
     setSearch("");
     setBatch("");
     setYear("");
     setSemester("");
+    setSection("");
     setSubject("");
     setExam("");
     setMaterialType("");
   };
+
   const hasFilters =
-    batch || year || semester || subject || exam || materialType || search;
+    batch ||
+    year ||
+    semester ||
+    section ||
+    subject ||
+    exam ||
+    materialType ||
+    search;
 
   return (
     <div>
@@ -90,7 +101,6 @@ export default function BrowsePage() {
         </p>
       </div>
 
-      {/* Search */}
       <input
         type="text"
         placeholder="Search by title, subject, tags, uploader…"
@@ -99,7 +109,6 @@ export default function BrowsePage() {
         style={{ marginBottom: 12, paddingLeft: 14 }}
       />
 
-      {/* Filters */}
       <div
         style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}
       >
@@ -115,6 +124,7 @@ export default function BrowsePage() {
             </option>
           ))}
         </select>
+
         <select
           value={year}
           onChange={(e) => {
@@ -130,6 +140,7 @@ export default function BrowsePage() {
             </option>
           ))}
         </select>
+
         <select
           value={semester}
           onChange={(e) => setSemester(e.target.value)}
@@ -142,6 +153,18 @@ export default function BrowsePage() {
             </option>
           ))}
         </select>
+
+        <select
+          value={section}
+          onChange={(e) => setSection(e.target.value)}
+          style={{ flex: 1, minWidth: 120 }}
+        >
+          <option value="">All sections</option>
+          <option value="Common">Common</option>
+          <option value="A">Section A</option>
+          <option value="B">Section B</option>
+        </select>
+
         <select
           value={subject}
           onChange={(e) => setSubject(e.target.value)}
@@ -154,6 +177,7 @@ export default function BrowsePage() {
             </option>
           ))}
         </select>
+
         <select
           value={exam}
           onChange={(e) => {
@@ -182,6 +206,7 @@ export default function BrowsePage() {
             </option>
           ))}
         </select>
+
         <select
           value={sort}
           onChange={(e) => setSort(e.target.value)}
@@ -208,6 +233,7 @@ export default function BrowsePage() {
             ? `Showing all ${all.length} materials`
             : `${filtered.length} result${filtered.length !== 1 ? "s" : ""} of ${all.length}`}
         </p>
+
         {hasFilters && (
           <button
             onClick={clearFilters}

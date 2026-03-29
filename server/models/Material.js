@@ -23,6 +23,13 @@ const materialSchema = new mongoose.Schema(
       max: 6,
       required: [true, "Semester is required"],
     },
+    section: {
+      type: String,
+      enum: ["A", "B", "Common"],
+      default: "Common",
+      required: true,
+    },
+
     subject: {
       type: String,
       required: [true, "Subject is required"],
@@ -130,10 +137,12 @@ materialSchema.index({
   batch: 1,
   mcaYear: 1,
   semester: 1,
+  section: 1,
   subject: 1,
   exam: 1,
   materialType: 1,
 });
+
 // Full-text search index
 materialSchema.index({
   title: "text",

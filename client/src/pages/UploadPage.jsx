@@ -32,6 +32,7 @@ export default function UploadPage() {
     batch: user?.batch || "",
     mcaYear: preset?.mcaYear || user?.currentYear || "",
     semester: preset?.semester || "",
+    section: preset?.section || "Common",
     subject: preset?.subject || "",
     exam: preset?.exam || "",
     materialType: preset?.materialType || "",
@@ -88,7 +89,8 @@ export default function UploadPage() {
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () =>
+      document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const handleDrop = (e) => {
@@ -107,6 +109,7 @@ export default function UploadPage() {
       !form.batch ||
       !form.mcaYear ||
       !form.semester ||
+      !form.section ||
       !form.subject ||
       !form.tags.trim() ||
       !form.exam ||
@@ -122,6 +125,7 @@ export default function UploadPage() {
       Object.entries(form).forEach(([k, v]) => {
         if (v) fd.append(k, v);
       });
+
       const res = await uploadMaterial(fd);
       addMaterial(res.data.material);
       toast.success("Material uploaded successfully!");
@@ -132,7 +136,6 @@ export default function UploadPage() {
         title: "",
         description: "",
       }));
-
     } catch (err) {
       const msg = err.response?.data?.error || "Upload failed";
       if (err.response?.status === 409) {
@@ -304,6 +307,37 @@ export default function UploadPage() {
               ))}
             </select>
           </div>
+        </div>
+
+        <div className="form-group">
+          <label className="form-label">Section</label>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            {["Common", "A", "B"].map((section) => (
+              <button
+                key={section}
+                type="button"
+                onClick={() => set("section", section)}
+                style={{
+                  padding: "7px 16px",
+                  borderRadius: "var(--radius)",
+                  fontSize: 13,
+                  fontWeight: 500,
+                  cursor: "pointer",
+                  transition: "all .15s",
+                  fontFamily: "var(--font-body)",
+                  background:
+                    form.section === section ? "var(--accent)" : "var(--bg3)",
+                  color: form.section === section ? "#fff" : "var(--text2)",
+                  border: `1px solid ${form.section === section ? "var(--accent)" : "var(--border)"}`,
+                }}
+              >
+                {section === "Common" ? "Common to all" : `Section ${section}`}
+              </button>
+            ))}
+          </div>
+          <p style={{ fontSize: 12, color: "var(--text3)", marginTop: 6 }}>
+            Use Common when the material applies to both sections.
+          </p>
         </div>
 
         <div className="form-group" ref={subjectBoxRef}>
