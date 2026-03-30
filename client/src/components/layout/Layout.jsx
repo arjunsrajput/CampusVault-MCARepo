@@ -80,11 +80,9 @@ export default function Layout() {
           >
             MCA<span style={{ color: "var(--text2)" }}>Repo</span>
           </NavLink>
+
           <NavLink to="/" style={nl}>
             Browse
-          </NavLink>
-          <NavLink to="/directory" style={nl}>
-            Directory
           </NavLink>
           <NavLink to="/upload" style={nl}>
             Upload
@@ -95,11 +93,19 @@ export default function Layout() {
           <NavLink to="/leaderboard" style={nl}>
             Leaders
           </NavLink>
+          <NavLink to="/directory" style={nl}>
+            Directory
+          </NavLink>
+          <NavLink to="/calculator" style={nl}>
+            GPA Calc
+          </NavLink>
+
           {user?.role === "admin" && (
             <NavLink to="/admin" style={nl}>
               Admin
             </NavLink>
           )}
+
           <div
             style={{
               marginLeft: "auto",
@@ -114,6 +120,7 @@ export default function Layout() {
             <NavLink to="/saved" style={nl}>
               Saved
             </NavLink>
+
             <NavLink
               to="/profile"
               style={{
@@ -140,7 +147,7 @@ export default function Layout() {
               >
                 {initials}
               </span>
-              {/* {user?.name?.split(' ')[0]} */}
+
               <span
                 style={{
                   display: "flex",
@@ -156,12 +163,14 @@ export default function Layout() {
                 )}
               </span>
             </NavLink>
+
             <button className="btn btn-ghost btn-sm" onClick={handleLogout}>
               Logout
             </button>
           </div>
         </div>
       </nav>
+
       <main style={{ flex: 1, padding: "28px 20px" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <Outlet />

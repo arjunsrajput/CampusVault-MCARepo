@@ -275,6 +275,28 @@ export default function MaterialCard({ material, showDelete = false }) {
             fontFamily: "var(--font-body)",
             transition: "all .12s",
           }}
+          onMouseEnter={(e) => {
+            if (upvoted) {
+              e.currentTarget.style.background = "var(--accent-dim)";
+              e.currentTarget.style.color = "var(--accent2)";
+              e.currentTarget.style.borderColor = "var(--accent)";
+            } else {
+              e.currentTarget.style.color = "var(--accent2)";
+              e.currentTarget.style.borderColor = "var(--accent)";
+              e.currentTarget.style.background = "transparent";
+            }
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = upvoted
+              ? "var(--accent-dim)"
+              : "transparent";
+            e.currentTarget.style.color = upvoted
+              ? "var(--accent2)"
+              : "var(--text3)";
+            e.currentTarget.style.borderColor = upvoted
+              ? "var(--accent)"
+              : "var(--border)";
+          }}
         >
           ▲ {material.upvotes || 0} Upvotes
         </button>

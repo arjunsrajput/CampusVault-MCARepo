@@ -21,6 +21,8 @@ import GapsPage from './pages/GapsPage.jsx'
 import MyUploadsPage from './pages/MyUploadsPage.jsx'
 import SavedPage from './pages/SavedPage.jsx'
 import MaterialPage from './pages/MaterialPage.jsx'
+import CalculatorPage from "./pages/CalculatorPage.jsx";
+
 
 function Protected({ children, adminOnly = false }) {
   const { user } = useAuthStore()
@@ -54,11 +56,13 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <Route path="/profile"   element={<ProfilePage />} />
           <Route path="/leaderboard" element={<LeaderboardPage />} />
           <Route path="/gaps"      element={<GapsPage />} />
+          <Route path="/calculator" element={<CalculatorPage />} />
           <Route path="/my-uploads" element={<MyUploadsPage />} />
           <Route path="/saved"     element={<SavedPage />} />
           <Route path="/material/:id" element={<MaterialPage />} />
           <Route path="/admin"     element={<Protected adminOnly><AdminPage /></Protected>} />
         </Route>
+
       </Routes>
     </BrowserRouter>
   </React.StrictMode>
