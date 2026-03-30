@@ -79,6 +79,9 @@ export default function CalculatorPage() {
         <h2 style={{ fontSize: 24, fontWeight: 800, marginBottom: 4 }}>
           GPA Calculator
         </h2>
+        <p style={{ color: "var(--text3)", fontSize: 16 }}>
+          (Expected)
+        </p>
         <p style={{ color: "var(--text3)", fontSize: 14 }}>
           Calculate semester GPA using the NIT Trichy grade scale.
         </p>
