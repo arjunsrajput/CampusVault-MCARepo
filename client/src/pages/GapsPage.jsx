@@ -24,7 +24,9 @@ export default function GapsPage() {
   const user = useAuthStore((state) => state.user);
   const navigate = useNavigate();
   const [filterBatch, setFilterBatch] = useState(user?.batch || "");
-  const [filterYear, setFilterYear] = useState("");
+  const [filterYear, setFilterYear] = useState(
+    user?.currentYear ? String(user.currentYear) : "",
+  );
   const [filterSemester, setFilterSemester] = useState("");
   const [filterSection, setFilterSection] = useState("");
 
@@ -145,7 +147,7 @@ export default function GapsPage() {
   );
 
   const clearFilters = () => {
-    setFilterBatch(user?.batch || "");
+    setFilterBatch("");
     setFilterYear("");
     setFilterSemester("");
     setFilterSection("");
@@ -256,7 +258,7 @@ export default function GapsPage() {
           }}
         >
           <p style={{ color: "var(--text3)", fontSize: 13 }}>
-            Default batch view is set to your batch.
+            Default filters use your batch and year.
           </p>
 
           {hasActiveFilters && (
