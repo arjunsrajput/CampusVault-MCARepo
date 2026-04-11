@@ -12,6 +12,7 @@ export const changePassword = (d) => api.patch('/auth/change-password', d)
 export const getAllMaterials  = ()     => api.get('/materials/all')
 export const getMaterial      = (id)   => api.get(`/materials/${id}`)
 export const uploadMaterial   = (form) => api.post('/materials', form, {headers:{'Content-Type':'multipart/form-data'}})
+export const updateMaterial   = (id,d) => api.patch(`/materials/${id}`, d)
 // export const trackDownload    = (id)   => api.patch(`/materials/${id}/download`)
 export const trackDownload = (id) => api.patch(`/materials/${id}/download`)
 export const serveFile     = (id) => `/api/materials/${id}/serve`

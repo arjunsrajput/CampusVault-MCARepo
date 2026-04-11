@@ -10,6 +10,7 @@ import {
   getMaterials,
   getMaterial,
   createMaterial,
+  updateMaterial,
   trackDownload,
   upvoteMaterial,
   flagMaterial,
@@ -24,6 +25,7 @@ router.get('/gaps',           protect, getGaps)
 router.get('/',               protect, getMaterials)
 router.get('/:id',            protect, getMaterial)
 router.post('/',              protect, upload.single('file'), createMaterial)
+router.patch('/:id',          protect, updateMaterial)
 router.patch('/:id/download', protect, trackDownload)
 router.patch('/:id/upvote',   protect, upvoteMaterial)
 router.post('/:id/flag',      protect, flagMaterial)

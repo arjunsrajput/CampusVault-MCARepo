@@ -2,6 +2,54 @@ import Material from "../models/Material.js";
 import User from "../models/User.js";
 import { cloudinary, uploadToCloudinary } from "../config/cloudinary.js";
 
+const parseTags = (tags) => {
+  if (Array.isArray(tags)) {
+    return tags
+      .map((tag) => String(tag).trim().toLowerCase())
+      .filter(Boolean);
+  }
+
+  return tags
+    ? String(tags)
+        .split(",")
+        .map((tag) => tag.trim().toLowerCase())
+        .filter(Boolean)
+    : [];
+};
+
+const findDuplicateMaterial = async ({
+  batch,
+  mcaYear,
+  semester,
+  section,
+  subject,
+  exam,
+  materialType,
+  title,
+  excludeId,
+}) => {
+  const isGeneralNotes = exam === "General" && materialType === "Notes";
+
+  const baseFilter = {
+    batch,
+    mcaYear: Number(mcaYear),
+    semester: Number(semester),
+    section,
+    subject,
+    exam,
+    materialType,
+    ...(excludeId && { _id: { $ne: excludeId } }),
+  };
+
+  const filter = isGeneralNotes
+    ? { ...baseFilter, title: title.trim() }
+    : baseFilter;
+
+  const existing = await Material.findOne(filter);
+
+  return { existing, isGeneralNotes };
+};
+
 export const getAllMaterials = async (req, res) => {
   try {
     const materials = await Material.find(
@@ -126,32 +174,16 @@ export const createMaterial = async (req, res) => {
       return res.status(400).json({ error: "PDF file is required." });
     }
 
-    const isGeneralNotes = exam === "General" && materialType === "Notes";
-
-    let existing = null;
-
-    if (isGeneralNotes) {
-      existing = await Material.findOne({
-        batch,
-        mcaYear: Number(mcaYear),
-        semester: Number(semester),
-        section,
-        subject,
-        exam,
-        materialType,
-        title: title.trim(),
-      });
-    } else {
-      existing = await Material.findOne({
-        batch,
-        mcaYear: Number(mcaYear),
-        semester: Number(semester),
-        section,
-        subject,
-        exam,
-        materialType,
-      });
-    }
+    const { existing, isGeneralNotes } = await findDuplicateMaterial({
+      batch,
+      mcaYear,
+      semester,
+      section,
+      subject,
+      exam,
+      materialType,
+      title,
+    });
 
     if (existing) {
       return res.status(409).json({
@@ -167,12 +199,7 @@ export const createMaterial = async (req, res) => {
       req.file.originalname,
     );
 
-    const parsedTags = tags
-      ? tags
-          .split(",")
-          .map((t) => t.trim().toLowerCase())
-          .filter(Boolean)
-      : [];
+    const parsedTags = parseTags(tags);
 
     if (parsedTags.length === 0) {
       return res.status(400).json({ error: "At least one tag is required." });
@@ -205,6 +232,109 @@ export const createMaterial = async (req, res) => {
     res.status(201).json({ material: populated });
   } catch (err) {
     console.error("Upload error:", err.message);
+    if (err.name === "ValidationError") {
+      const messages = Object.values(err.errors)
+        .map((e) => e.message)
+        .join(", ");
+      return res.status(400).json({ error: messages });
+    }
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const updateMaterial = async (req, res) => {
+  try {
+    const material = await Material.findById(req.params.id);
+    if (!material) {
+      return res.status(404).json({ error: "Material not found." });
+    }
+
+    const isOwner = material.uploadedBy.toString() === req.user._id.toString();
+    const isAdmin = req.user.role === "admin";
+
+    if (!isOwner && !isAdmin) {
+      return res
+        .status(403)
+        .json({ error: "Not authorized to edit this material." });
+    }
+
+    const {
+      title,
+      batch,
+      mcaYear,
+      semester,
+      section,
+      subject,
+      exam,
+      materialType,
+      faculty,
+      tags,
+      description,
+    } = req.body;
+
+    if (
+      !title ||
+      !batch ||
+      !mcaYear ||
+      !semester ||
+      !section ||
+      !subject ||
+      !tags ||
+      !exam ||
+      !materialType
+    ) {
+      return res
+        .status(400)
+        .json({ error: "All required fields must be filled." });
+    }
+
+    const parsedTags = parseTags(tags);
+    if (parsedTags.length === 0) {
+      return res.status(400).json({ error: "At least one tag is required." });
+    }
+
+    const { existing, isGeneralNotes } = await findDuplicateMaterial({
+      batch,
+      mcaYear,
+      semester,
+      section,
+      subject,
+      exam,
+      materialType,
+      title,
+      excludeId: material._id,
+    });
+
+    if (existing) {
+      return res.status(409).json({
+        error: isGeneralNotes
+          ? "A notes file with the same title already exists for this subject."
+          : "A material with this batch/year/sem/subject/type already exists.",
+        existingId: existing._id,
+      });
+    }
+
+    material.title = title;
+    material.batch = batch;
+    material.mcaYear = Number(mcaYear);
+    material.semester = Number(semester);
+    material.section = section;
+    material.subject = subject;
+    material.exam = exam;
+    material.materialType = materialType;
+    material.faculty = faculty;
+    material.tags = parsedTags;
+    material.description = description;
+
+    await material.save();
+
+    const populated = await material.populate(
+      "uploadedBy",
+      "name batch rollNumber email",
+    );
+
+    res.json({ material: populated });
+  } catch (err) {
     if (err.name === "ValidationError") {
       const messages = Object.values(err.errors)
         .map((e) => e.message)
