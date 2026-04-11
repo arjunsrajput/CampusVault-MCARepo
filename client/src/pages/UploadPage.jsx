@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { getSubjects, uploadMaterial } from "../api/index.js";
+import { getFaculty, getSubjects, uploadMaterial } from "../api/index.js";
 import { useMaterialStore } from "../store/materialStore.js";
 import { useAuthStore } from "../store/authStore.js";
 import {
@@ -22,10 +22,13 @@ export default function UploadPage() {
   const user = useAuthStore((s) => s.user);
   const [loading, setLoading] = useState(false);
   const [availableSubjects, setAvailableSubjects] = useState([]);
+  const [availableFaculty, setAvailableFaculty] = useState([]);
   const [file, setFile] = useState(null);
   const [drag, setDrag] = useState(false);
   const [showSubjectList, setShowSubjectList] = useState(false);
+  const [showFacultyList, setShowFacultyList] = useState(false);
   const subjectBoxRef = useRef(null);
+  const facultyBoxRef = useRef(null);
 
   const [form, setForm] = useState({
     title: "",
@@ -48,12 +51,14 @@ export default function UploadPage() {
     : [];
 
   useEffect(() => {
-    getSubjects()
-      .then((res) => {
-        setAvailableSubjects(res.data.subjects || []);
+    Promise.all([getSubjects(), getFaculty()])
+      .then(([subjectRes, facultyRes]) => {
+        setAvailableSubjects(subjectRes.data.subjects || []);
+        setAvailableFaculty(facultyRes.data.faculty || []);
       })
       .catch(() => {
         setAvailableSubjects([]);
+        setAvailableFaculty([]);
       });
   }, []);
 
@@ -81,10 +86,26 @@ export default function UploadPage() {
     );
   }, [availableSubjects, form.mcaYear, form.semester, form.subject]);
 
+  const suggestedFaculty = useMemo(() => {
+    const query = form.faculty.trim().toLowerCase();
+    const rankedFaculty = [...availableFaculty].sort((a, b) =>
+      a.name.localeCompare(b.name),
+    );
+
+    if (!query) return rankedFaculty;
+
+    return rankedFaculty.filter((item) =>
+      item.name.toLowerCase().includes(query),
+    );
+  }, [availableFaculty, form.faculty]);
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (!subjectBoxRef.current?.contains(event.target)) {
         setShowSubjectList(false);
+      }
+      if (!facultyBoxRef.current?.contains(event.target)) {
+        setShowFacultyList(false);
       }
     };
 
@@ -432,16 +453,67 @@ export default function UploadPage() {
           </p>
         </div>
 
-        <div className="form-group">
+        <div className="form-group" ref={facultyBoxRef}>
           <label className="form-label">Faculty name</label>
-          <input
-            placeholder="e.g. Dr. Ramesh Kumar"
-            value={form.faculty}
-            onChange={(e) => set("faculty", e.target.value)}
-          />
+          <div style={{ position: "relative" }}>
+            <input
+              placeholder="Search saved faculty or type a new name"
+              value={form.faculty}
+              onChange={(e) => {
+                set("faculty", e.target.value);
+                setShowFacultyList(true);
+              }}
+              onFocus={() => setShowFacultyList(true)}
+            />
+            {showFacultyList && suggestedFaculty.length > 0 && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: "calc(100% + 6px)",
+                  left: 0,
+                  right: 0,
+                  background: "var(--card)",
+                  border: "1px solid var(--border2)",
+                  borderRadius: "var(--radius)",
+                  boxShadow: "0 16px 40px rgba(0,0,0,0.35)",
+                  maxHeight: 220,
+                  overflowY: "auto",
+                  zIndex: 20,
+                  padding: 6,
+                }}
+              >
+                {suggestedFaculty.map((item) => (
+                  <button
+                    key={item._id || item.name}
+                    type="button"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => {
+                      set("faculty", item.name);
+                      setShowFacultyList(false);
+                    }}
+                    style={{
+                      width: "100%",
+                      textAlign: "left",
+                      padding: "10px 12px",
+                      borderRadius: 8,
+                      background:
+                        form.faculty === item.name
+                          ? "var(--accent-bg)"
+                          : "transparent",
+                      color:
+                        form.faculty === item.name
+                          ? "var(--accent2)"
+                          : "var(--text)",
+                    }}
+                  >
+                    {item.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
           <p style={{ fontSize: 12, color: "var(--text3)", marginTop: 5 }}>
-            Professor who taught this subject : helps students find relevant
-            paper
+            Pick a saved faculty name or type a new one if it is missing.
           </p>
         </div>
 

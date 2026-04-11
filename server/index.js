@@ -10,6 +10,7 @@ import { connectDB } from './config/db.js'
 import authRoutes from './routes/auth.js'
 import materialRoutes from './routes/materials.js'
 import subjectRoutes from './routes/subjects.js'
+import facultyRoutes from './routes/faculty.js'
 import adminRoutes from './routes/admin.js'
 import userRoutes from './routes/users.js'
 
@@ -40,6 +41,7 @@ app.use('/api/auth', authLimiter)
 app.use('/api/auth',      authRoutes)
 app.use('/api/materials', materialRoutes)
 app.use('/api/subjects',  subjectRoutes)
+app.use('/api/faculty',   facultyRoutes)
 app.use('/api/admin',     adminRoutes)
 app.use('/api/users',     userRoutes)
 
