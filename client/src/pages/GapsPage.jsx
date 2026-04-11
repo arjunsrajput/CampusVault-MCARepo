@@ -258,7 +258,6 @@ export default function GapsPage() {
           }}
         >
           <p style={{ color: "var(--text3)", fontSize: 13 }}>
-            Default filters use your batch and year.
           </p>
 
           {hasActiveFilters && (
