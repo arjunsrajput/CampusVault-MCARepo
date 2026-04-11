@@ -39,11 +39,6 @@ const materialSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
-    // examType: {
-    //   type: String,
-    //   enum: ["CT1", "CT2", "FAT", "Notes", "AnswerScript"],
-    //   required: [true, "Exam type is required"],
-    // },
     exam: {
       type: String,
       enum: ["CT1", "CT2", "FAT", "LabExam", "General"],
@@ -126,13 +121,7 @@ const materialSchema = new mongoose.Schema(
 );
 
 // Compound index for fast filtered queries
-// materialSchema.index({
-//   batch: 1,
-//   mcaYear: 1,
-//   semester: 1,
-//   subject: 1,
-//   examType: 1,
-// });
+
 materialSchema.index({
   batch: 1,
   mcaYear: 1,

@@ -52,19 +52,6 @@ const sanitizeDirectoryMember = async (viewer, member) => {
   };
 };
 
-// GET /api/users/leaderboard
-// router.get('/leaderboard', protect, async (req, res) => {
-//   try {
-//     const users = await User.find({ uploadCount: { $gt: 0 } })
-//       .select('name batch rollNumber uploadCount')
-//       .sort({ uploadCount: -1 })
-//       .limit(20)
-//     res.json({ users })
-//   } catch (err) {
-//     res.status(500).json({ error: err.message })
-//   }
-// })
-// GET /api/users/leaderboard
 router.get("/leaderboard", protect, async (req, res) => {
   try {
     const users = await Material.aggregate([

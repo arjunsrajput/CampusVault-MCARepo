@@ -1,6 +1,12 @@
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useMaterialStore } from "../store/materialStore.js";
-import { MCA_YEARS } from "../utils/constants.js";
+import { useAuthStore } from "../store/authStore.js";
+import {
+  BATCHES,
+  MCA_YEARS,
+  SEMESTERS,
+  YEAR_TO_SEMESTERS,
+} from "../utils/constants.js";
 import { useNavigate } from "react-router-dom";
 
 const GAP_UPLOAD_MAP = {
@@ -15,8 +21,12 @@ const GAP_UPLOAD_MAP = {
 
 export default function GapsPage() {
   const { all, loading } = useMaterialStore();
+  const user = useAuthStore((state) => state.user);
   const navigate = useNavigate();
+  const [filterBatch, setFilterBatch] = useState(user?.batch || "");
   const [filterYear, setFilterYear] = useState("");
+  const [filterSemester, setFilterSemester] = useState("");
+  const [filterSection, setFilterSection] = useState("");
 
   const goToPrefilledUpload = (row, gapKey) => {
     const preset = GAP_UPLOAD_MAP[gapKey];
@@ -24,6 +34,7 @@ export default function GapsPage() {
 
     navigate("/upload", {
       state: {
+        batch: row.batch,
         subject: row.subject,
         mcaYear: row.mcaYear,
         semester: row.semester,
@@ -38,10 +49,11 @@ export default function GapsPage() {
     const map = {};
 
     all.forEach((m) => {
-      const key = `${m.mcaYear}-${m.semester}-${m.subject}-${m.section || "Common"}`;
+      const key = `${m.batch || ""}-${m.mcaYear}-${m.semester}-${m.subject}-${m.section || "Common"}`;
 
       if (!map[key]) {
         map[key] = {
+          batch: m.batch || "",
           mcaYear: m.mcaYear,
           semester: m.semester,
           section: m.section || "Common",
@@ -58,6 +70,7 @@ export default function GapsPage() {
 
     return Object.values(map).sort(
       (a, b) =>
+        a.batch.localeCompare(b.batch) ||
         a.mcaYear - b.mcaYear ||
         a.semester - b.semester ||
         a.subject.localeCompare(b.subject) ||
@@ -65,9 +78,17 @@ export default function GapsPage() {
     );
   }, [all]);
 
-  const filtered = filterYear
-    ? coverage.filter((c) => c.mcaYear === Number(filterYear))
-    : coverage;
+  const availableSemesters = filterYear
+    ? YEAR_TO_SEMESTERS[Number(filterYear)] || SEMESTERS
+    : SEMESTERS;
+
+  const filtered = coverage.filter((c) => {
+    if (filterBatch && c.batch !== filterBatch) return false;
+    if (filterYear && c.mcaYear !== Number(filterYear)) return false;
+    if (filterSemester && c.semester !== Number(filterSemester)) return false;
+    if (filterSection && c.section !== filterSection) return false;
+    return true;
+  });
 
   const SHOW_COMBOS = [
     {
@@ -123,6 +144,17 @@ export default function GapsPage() {
     0,
   );
 
+  const clearFilters = () => {
+    setFilterBatch(user?.batch || "");
+    setFilterYear("");
+    setFilterSemester("");
+    setFilterSection("");
+  };
+
+  const hasActiveFilters = Boolean(
+    filterBatch || filterYear || filterSemester || filterSection,
+  );
+
   return (
     <div>
       <div
@@ -142,22 +174,97 @@ export default function GapsPage() {
           <p style={{ color: "var(--text3)", fontSize: 14 }}>
             {loading
               ? "Loading…"
-              : `${totalGaps} gap${totalGaps !== 1 ? "s" : ""} found — missing materials highlighted in red`}
+              : `${totalGaps} gap${totalGaps !== 1 ? "s" : ""} found in ${filtered.length} row${filtered.length !== 1 ? "s" : ""} — missing materials highlighted in red`}
           </p>
         </div>
+      </div>
 
-        <select
-          value={filterYear}
-          onChange={(e) => setFilterYear(e.target.value)}
-          style={{ width: "auto", minWidth: 120 }}
+      <div
+        className="card"
+        style={{
+          marginBottom: 20,
+          padding: 16,
+          display: "flex",
+          flexDirection: "column",
+          gap: 12,
+        }}
+      >
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))",
+            gap: 10,
+          }}
         >
-          <option value="">All years</option>
-          {MCA_YEARS.map((y) => (
-            <option key={y} value={y}>
-              Year {y}
-            </option>
-          ))}
-        </select>
+          <select
+            value={filterBatch}
+            onChange={(e) => setFilterBatch(e.target.value)}
+          >
+            <option value="">All batches</option>
+            {BATCHES.map((batch) => (
+              <option key={batch} value={batch}>
+                {batch}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={filterYear}
+            onChange={(e) => {
+              setFilterYear(e.target.value);
+              setFilterSemester("");
+            }}
+          >
+            <option value="">All years</option>
+            {MCA_YEARS.map((y) => (
+              <option key={y} value={y}>
+                Year {y}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={filterSemester}
+            onChange={(e) => setFilterSemester(e.target.value)}
+          >
+            <option value="">All semesters</option>
+            {availableSemesters.map((semester) => (
+              <option key={semester} value={semester}>
+                Semester {semester}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={filterSection}
+            onChange={(e) => setFilterSection(e.target.value)}
+          >
+            <option value="">All sections</option>
+            <option value="Common">Common</option>
+            <option value="A">Section A</option>
+            <option value="B">Section B</option>
+          </select>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 10,
+            flexWrap: "wrap",
+          }}
+        >
+          <p style={{ color: "var(--text3)", fontSize: 13 }}>
+            Default batch view is set to your batch.
+          </p>
+
+          {hasActiveFilters && (
+            <button className="btn btn-ghost btn-sm" onClick={clearFilters}>
+              Clear filters
+            </button>
+          )}
+        </div>
       </div>
 
       {loading ? (
@@ -188,6 +295,21 @@ export default function GapsPage() {
                   }}
                 >
                   Subject
+                </th>
+
+                <th
+                  style={{
+                    textAlign: "center",
+                    padding: "10px 8px",
+                    color: "var(--text3)",
+                    fontWeight: 500,
+                    fontSize: 12,
+                    fontFamily: "var(--font-head)",
+                    textTransform: "uppercase",
+                    letterSpacing: ".04em",
+                  }}
+                >
+                  Batch
                 </th>
 
                 <th
@@ -242,6 +364,17 @@ export default function GapsPage() {
                 >
                   <td style={{ padding: "10px 12px", fontWeight: 500 }}>
                     {c.subject}
+                  </td>
+
+                  <td
+                    style={{
+                      padding: "10px 8px",
+                      textAlign: "center",
+                      color: "var(--text3)",
+                      fontSize: 12,
+                    }}
+                  >
+                    {c.batch || "—"}
                   </td>
 
                   <td
