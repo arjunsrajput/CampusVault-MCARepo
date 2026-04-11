@@ -19,12 +19,14 @@ const getInitials = (name) =>
     .toUpperCase();
 
 function VerificationBadge({ isVerified }) {
+  if (!isVerified) return null;
+
   return (
     <span
-      className={`badge ${isVerified ? "badge-notes" : "badge-report"}`}
+      className="badge badge-notes"
       style={{ display: "inline-flex", alignItems: "center", gap: 4 }}
     >
-      {isVerified ? "Verified" : "Unverified"}
+      Verified
     </span>
   );
 }
