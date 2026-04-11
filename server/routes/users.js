@@ -9,7 +9,7 @@ const normalizeName = (value) =>
 const trimValue = (value) =>
   value === undefined || value === null ? "" : String(value).trim();
 const profileFields =
-  "name batch rollNumber currentYear role email isAlumni graduationYear company jobTitle city linkedinUrl personalEmail bio directoryVisibility showEmail showLinkedin uploadCount";
+  "name batch rollNumber currentYear role email isVerified isAlumni graduationYear company jobTitle city linkedinUrl personalEmail bio directoryVisibility showEmail showLinkedin uploadCount";
 
 const canViewerSeeUser = (viewer, member) => {
   if (member.directoryVisibility === "hidden") return false;
@@ -39,6 +39,7 @@ const sanitizeDirectoryMember = async (viewer, member) => {
     rollNumber: member.rollNumber,
     batch: member.batch,
     currentYear: member.currentYear,
+    isVerified: member.isVerified,
     isAlumni: member.isAlumni,
     graduationYear: member.graduationYear,
     company: member.company,
