@@ -66,7 +66,7 @@ export default function BatchDirectoryPage() {
           </span>
         </h2>
         <p style={{ color: "var(--text3)", fontSize: 14 }}>
-          Members are sorted by roll number in ascending order.
+          {/* Members are sorted by roll number in ascending order. */}
         </p>
       </div>
 
