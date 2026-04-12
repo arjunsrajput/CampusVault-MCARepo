@@ -35,7 +35,9 @@ router.get("/flagged", protect, adminOnly, async (req, res) => {
       { flagged: true },
       { includeDeleted: true },
     )
-      .populate("uploadedBy", "name email")
+      .populate("uploadedBy", "name email rollNumber")
+      .populate("flaggedBy", "name email rollNumber")
+      .populate("flagReports.flaggedBy", "name email rollNumber")
       .sort({ createdAt: -1 });
     res.json({ materials });
   } catch (err) {
@@ -50,6 +52,7 @@ router.patch("/unflag/:id", protect, adminOnly, async (req, res) => {
       flagged: false,
       flagReason: "",
       flaggedBy: [],
+      flagReports: [],
     });
     res.json({ message: "Material unflagged." });
   } catch (err) {

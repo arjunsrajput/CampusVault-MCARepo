@@ -396,12 +396,20 @@ export const upvoteMaterial = async (req, res) => {
 export const flagMaterial = async (req, res) => {
   try {
     const { reason } = req.body;
+    const trimmedReason = String(reason || "").trim();
     const material = await Material.findByIdAndUpdate(
       req.params.id,
       {
         flagged: true,
-        flagReason: reason || "No reason provided",
+        flagReason: trimmedReason || "No reason provided",
         $addToSet: { flaggedBy: req.user._id },
+        $push: {
+          flagReports: {
+            flaggedBy: req.user._id,
+            reason: trimmedReason || "No reason provided",
+            createdAt: new Date(),
+          },
+        },
       },
       { new: true },
     );

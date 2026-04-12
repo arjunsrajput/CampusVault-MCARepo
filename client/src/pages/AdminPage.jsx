@@ -12,6 +12,7 @@ import {
   getFaculty,
   createFaculty,
   deleteFaculty,
+  serveFile,
 } from "../api/index.js";
 import toast from "react-hot-toast";
 import {
@@ -253,6 +254,12 @@ export default function AdminPage() {
   const subjectFilterSemesters = subjectFilters.year
     ? YEAR_TO_SEMESTERS[Number(subjectFilters.year)] || SEMESTERS
     : SEMESTERS;
+  const token = localStorage.getItem("token");
+
+  const openPdf = (id) => {
+    const pdfUrl = token ? `${serveFile(id)}?token=${token}` : serveFile(id);
+    window.open(pdfUrl, "_blank", "noopener,noreferrer");
+  };
 
   if (loading) return <div className="spinner" />;
 
@@ -415,56 +422,147 @@ export default function AdminPage() {
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {flagged.map((m) => (
-                <div
-                  key={m._id}
-                  className="card"
-                  style={{ padding: "14px 18px" }}
-                >
+                <div key={m._id} className="card" style={{ padding: "16px 18px" }}>
                   <div
                     style={{
                       display: "flex",
                       alignItems: "flex-start",
                       justifyContent: "space-between",
-                      gap: 12,
+                      gap: 16,
+                      flexWrap: "wrap",
                     }}
                   >
-                    <div style={{ flex: 1 }}>
+                    <div style={{ flex: 1, minWidth: 280 }}>
                       <p
                         style={{
-                          fontWeight: 600,
-                          fontSize: 14,
-                          marginBottom: 4,
+                          fontWeight: 700,
+                          fontSize: 15,
+                          marginBottom: 6,
                           fontFamily: "var(--font-head)",
                         }}
                       >
-                        {m.title}
+                        {m.title || "Untitled material"}
                       </p>
                       <p
                         style={{
                           fontSize: 12,
                           color: "var(--text3)",
-                          marginBottom: 6,
+                          marginBottom: 4,
                         }}
                       >
-                        {m.subject} · {m.examType} · {m.batch} · Uploaded by{" "}
-                        {m.uploadedBy?.name} · {formatDate(m.createdAt)}
+                        {[
+                          m.subject,
+                          m.exam,
+                          m.materialType,
+                          m.batch,
+                          m.mcaYear ? `Y${m.mcaYear}` : null,
+                          m.semester ? `S${m.semester}` : null,
+                          m.section ? `Sec ${m.section}` : null,
+                        ]
+                          .filter(Boolean)
+                          .join(" · ")}
                       </p>
-                      {m.flagReason && (
-                        <p
-                          style={{
-                            fontSize: 12,
-                            background: "var(--red-bg)",
-                            color: "var(--red)",
-                            padding: "4px 10px",
-                            borderRadius: 6,
-                            display: "inline-block",
-                          }}
-                        >
-                          Reason: {m.flagReason}
-                        </p>
-                      )}
+                      <p
+                        style={{
+                          fontSize: 12,
+                          color: "var(--text3)",
+                          marginBottom: 10,
+                        }}
+                      >
+                        Uploaded by {m.uploadedBy?.name || "Unknown user"}
+                        {m.uploadedBy?.email ? ` (${m.uploadedBy.email})` : ""} ·{" "}
+                        {formatDate(m.createdAt)}
+                      </p>
+
+                      {(() => {
+                        const reports =
+                          m.flagReports?.length > 0
+                            ? m.flagReports
+                            : [
+                                {
+                                  flaggedBy: null,
+                                  reason: m.flagReason,
+                                  createdAt: m.updatedAt || m.createdAt,
+                                },
+                              ].filter((report) => report.reason);
+
+                        return reports.length > 0 ? (
+                          <div
+                            style={{
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: 8,
+                              marginTop: 8,
+                            }}
+                          >
+                            {reports.map((report, idx) => (
+                              <div
+                                key={`${m._id}-report-${idx}`}
+                                style={{
+                                  border: "1px solid rgba(239,68,68,.18)",
+                                  background: "var(--red-bg)",
+                                  borderRadius: 10,
+                                  padding: "10px 12px",
+                                }}
+                              >
+                                <p
+                                  style={{
+                                    fontSize: 12,
+                                    fontWeight: 600,
+                                    color: "var(--red)",
+                                    marginBottom: 4,
+                                  }}
+                                >
+                                  Reported by{" "}
+                                  {report.flaggedBy?.name ||
+                                    (m.flaggedBy?.length
+                                      ? m.flaggedBy
+                                          .map((user) => user?.name)
+                                          .filter(Boolean)
+                                          .join(", ")
+                                      : "Unknown user")}
+                                  {report.flaggedBy?.email
+                                    ? ` (${report.flaggedBy.email})`
+                                    : ""}
+                                </p>
+                                <p
+                                  style={{
+                                    fontSize: 12,
+                                    color: "var(--text2)",
+                                    marginBottom: 4,
+                                  }}
+                                >
+                                  {report.reason || "No reason provided"}
+                                </p>
+                                <p style={{ fontSize: 11, color: "var(--text3)" }}>
+                                  {formatDate(report.createdAt)}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p style={{ fontSize: 12, color: "var(--text3)" }}>
+                            This material is flagged, but no report comment was
+                            saved.
+                          </p>
+                        );
+                      })()}
                     </div>
-                    <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: 8,
+                        flexShrink: 0,
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      <button
+                        className="btn btn-ghost btn-sm"
+                        onClick={() => openPdf(m._id)}
+                      >
+                        View PDF
+                      </button>
                       <button
                         className="btn btn-ghost btn-sm"
                         onClick={() => handleUnflag(m._id)}

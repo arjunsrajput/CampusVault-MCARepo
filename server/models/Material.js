@@ -112,6 +112,24 @@ const materialSchema = new mongoose.Schema(
     flagReason: {
       type: String,
     },
+    flagReports: [
+      {
+        flaggedBy: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+          required: true,
+        },
+        reason: {
+          type: String,
+          trim: true,
+          required: true,
+        },
+        createdAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
     isDeleted: {
       type: Boolean,
       default: false,
