@@ -21,7 +21,7 @@ export default function LeaderboardPage() {
           Contribution leaders
         </h2>
         <p style={{ color: "var(--text3)", fontSize: 14 }}>
-          Students who have uploaded the most materials
+          The people keeping this place alive.
         </p>
       </div>
 

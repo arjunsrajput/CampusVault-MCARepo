@@ -97,7 +97,7 @@ export default function BrowsePage() {
         <p style={{ color: "var(--text3)", fontSize: 14 }}>
           {loading
             ? "Loading…"
-            : `${all.length} materials loaded — search and filter instantly`}
+            : `${all.length} materials loaded : Search and Filter`}
         </p>
       </div>
 

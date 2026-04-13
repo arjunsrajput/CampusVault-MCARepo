@@ -308,9 +308,9 @@ export default function ProfilePage() {
                   value={form.directoryVisibility}
                   onChange={(e) => set("directoryVisibility", e.target.value)}
                 >
-                  <option value="all">Visible to all students</option>
-                  <option value="same_batch">Same batch only</option>
-                  <option value="hidden">Hidden from directory</option>
+                  <option value="all">Everyone</option>
+                  <option value="same_batch">My batch only</option>
+                  <option value="hidden">Hidden</option>
                 </select>
               </div>
               <div

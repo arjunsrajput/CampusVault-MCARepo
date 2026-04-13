@@ -176,7 +176,7 @@ export default function UploadPage() {
           Upload material
         </h2>
         <p style={{ color: "var(--text3)", fontSize: 14 }}>
-          Share past papers, notes and answer scripts with your batch
+          Upload a paper, answer script or notes. Your juniors will find it here.
         </p>
         {preset && (
           <p style={{ color: "var(--accent2)", fontSize: 13, marginTop: 8 }}>
@@ -247,10 +247,10 @@ export default function UploadPage() {
               <p
                 style={{ fontSize: 14, color: "var(--text2)", marginBottom: 4 }}
               >
-                Drop PDF here or click to browse
+                Drop PDF here or click to pick
               </p>
               <p style={{ fontSize: 12, color: "var(--text3)" }}>
-                Max 20 MB · PDF only
+                PDF only · Max 20 MB
               </p>
             </>
           )}

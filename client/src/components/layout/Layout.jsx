@@ -91,7 +91,7 @@ export default function Layout() {
             Gaps
           </NavLink>
           <NavLink to="/leaderboard" style={nl}>
-            Leaders
+            Top Uploaders
           </NavLink>
           <NavLink to="/directory" style={nl}>
             Directory

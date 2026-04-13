@@ -23,7 +23,7 @@ export default function MyUploadsPage() {
       {loading ? <div className="spinner" /> : materials.length===0 ? (
         <div className="empty-state">
           <h3>No uploads yet</h3>
-          <p>Start contributing to help your juniors!</p>
+          <p>Upload something. Be the senior you wish you had.</p>
         </div>
       ) : (
         <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))',gap:12}}>
