@@ -480,10 +480,36 @@ export const getGaps = async (req, res) => {
       {
         $group: {
           _id: {
+            batch: "$batch",
             subject: "$subject",
-            examType: "$examType",
+            exam: { $ifNull: ["$exam", "$examType"] },
+            materialType: {
+              $ifNull: [
+                "$materialType",
+                {
+                  $switch: {
+                    branches: [
+                      {
+                        case: { $in: ["$examType", ["CT1", "CT2", "FAT"]] },
+                        then: "QuestionPaper",
+                      },
+                      {
+                        case: { $eq: ["$examType", "AnswerScript"] },
+                        then: "AnswerScript",
+                      },
+                      {
+                        case: { $eq: ["$examType", "Notes"] },
+                        then: "Notes",
+                      },
+                    ],
+                    default: "QuestionPaper",
+                  },
+                },
+              ],
+            },
             mcaYear: "$mcaYear",
             semester: "$semester",
+            section: { $ifNull: ["$section", "Common"] },
           },
           count: { $sum: 1 },
         },

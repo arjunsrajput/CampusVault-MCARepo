@@ -1,17 +1,14 @@
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/authStore.js";
-import { useMaterialStore } from "../../store/materialStore.js";
 import { getMe } from "../../api/index.js";
 import toast from "react-hot-toast";
 import { useEffect } from "react";
 
 export default function Layout() {
   const { user, logout, updateUser } = useAuthStore();
-  const { fetchAll } = useMaterialStore();
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchAll();
     getMe()
       .then((res) => updateUser(res.data.user))
       .catch(() => {});

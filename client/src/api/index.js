@@ -10,6 +10,7 @@ export const getMe    = ()  => api.get('/auth/me')
 export const changePassword = (d) => api.patch('/auth/change-password', d)
 
 export const getAllMaterials  = ()     => api.get('/materials/all')
+export const getMaterials     = (p)    => api.get('/materials',{params:p})
 export const getMaterial      = (id)   => api.get(`/materials/${id}`)
 export const uploadMaterial   = (form) => api.post('/materials', form, {headers:{'Content-Type':'multipart/form-data'}})
 export const updateMaterial   = (id,d) => api.patch(`/materials/${id}`, d)

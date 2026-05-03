@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMaterialStore } from "../store/materialStore.js";
 import { useAuthStore } from "../store/authStore.js";
 import {
@@ -20,7 +20,7 @@ const GAP_UPLOAD_MAP = {
 };
 
 export default function GapsPage() {
-  const { all, loading } = useMaterialStore();
+  const { all, loading, fetchAll } = useMaterialStore();
   const user = useAuthStore((state) => state.user);
   const navigate = useNavigate();
   const [filterBatch, setFilterBatch] = useState(user?.batch || "");
@@ -29,6 +29,10 @@ export default function GapsPage() {
   );
   const [filterSemester, setFilterSemester] = useState("");
   const [filterSection, setFilterSection] = useState("");
+
+  useEffect(() => {
+    fetchAll();
+  }, [fetchAll]);
 
   const goToPrefilledUpload = (row, gapKey) => {
     const preset = GAP_UPLOAD_MAP[gapKey];
@@ -479,7 +483,7 @@ export default function GapsPage() {
           >
             Upload
           </span>
-          Missing — click to contribute
+          Missing : click to contribute
         </div>
       </div>
     </div>
