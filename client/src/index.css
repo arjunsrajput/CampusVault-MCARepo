@@ -42,7 +42,7 @@ select option{background:var(--bg3);color:var(--text)}
 .badge-notes{background:var(--green-bg);color:var(--green)}
 .badge-answer,.badge-answerscript{background:var(--accent-bg);color:var(--accent2)}
 .badge-lab    { background: rgba(20,184,166,0.1);   color: #14b8a6; }
-.badge-qp     { background: rgba(124,111,255,0.12); color: #a899ff; }
+.badge-qp     { background: rgba(6,182,212,0.12);   color: #22D3EE; }
 .badge-report { background: rgba(245,158,11,0.1);   color: #f59e0b; }
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px}
 
