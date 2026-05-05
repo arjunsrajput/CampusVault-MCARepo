@@ -242,7 +242,7 @@ export default function MaterialCard({ material, showDelete = false }) {
                     color: "var(--text3)",
                     fontSize: 11,
                     padding: "2px 8px",
-                    borderRadius: 20,
+                    borderRadius: "var(--radius-sm)",
                     whiteSpace: "nowrap",
                   }}
                 >
