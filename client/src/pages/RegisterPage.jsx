@@ -66,7 +66,7 @@ export default function RegisterPage() {
     <div style={{
       minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center',
       background:'var(--bg)',
-      backgroundImage:'radial-gradient(ellipse at 40% 70%, rgba(124,111,255,0.07) 0%, transparent 60%)'
+      backgroundImage:'radial-gradient(ellipse at 40% 70%, rgba(6,182,212,0.07) 0%, transparent 60%)'
     }}>
       <div style={{width:'100%', maxWidth:440, padding:'0 24px'}}>
         <div style={{marginBottom:32, textAlign:'center'}}>

@@ -67,7 +67,7 @@ export default function DirectoryPage() {
                 gap: 14,
                 minHeight: 138,
                 background:
-                  "linear-gradient(180deg, rgba(124,111,255,0.09), rgba(124,111,255,0.02))",
+                  "linear-gradient(180deg, rgba(6,182,212,0.09), rgba(6,182,212,0.02))",
               }}
             >
               <div

@@ -57,7 +57,7 @@ export default function LoginPage() {
     <div style={{
       minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center',
       background:'var(--bg)',
-      backgroundImage:'radial-gradient(ellipse at 60% 20%, rgba(124,111,255,0.09) 0%, transparent 65%)'
+      backgroundImage:'radial-gradient(ellipse at 60% 20%, rgba(6,182,212,0.09) 0%, transparent 65%)'
     }}>
       <div style={{width:'100%', maxWidth:400, padding:'0 24px'}}>
         <div style={{marginBottom:36, textAlign:'center'}}>
