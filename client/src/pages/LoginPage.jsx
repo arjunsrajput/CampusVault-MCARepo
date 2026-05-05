@@ -64,7 +64,7 @@ export default function LoginPage() {
           <h1 style={{fontSize:36, fontWeight:800, marginBottom:8, letterSpacing:'-0.03em'}}>
             MCA<span style={{color:'var(--accent2)'}}>Repo</span>
           </h1>
-          <p style={{color:'var(--text2)', fontSize:15}}>Sign in to access study materials</p>
+          <p style={{color:'var(--text2)', fontSize:15}}>Sign in to access</p>
           {location.state?.notice && (
             <p style={{color:'var(--green)', fontSize:13, marginTop:10}}>
               {location.state.notice}
