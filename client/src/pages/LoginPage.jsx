@@ -85,7 +85,7 @@ export default function LoginPage() {
               {/* Show which mode is active */}
               {form.identifier.length > 0 && (
                 <p style={{fontSize:11, marginTop:5, color: isRollNumber(form.identifier) ? 'var(--green)' : 'var(--accent2)'}}>
-                  {isRollNumber(form.identifier) ? '✓ Using roll number' : '✓ Using email'}
+                  {isRollNumber(form.identifier) ? 'Using roll number' : 'Using email'}
                 </p>
               )}
             </div>
