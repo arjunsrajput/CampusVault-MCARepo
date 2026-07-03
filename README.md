@@ -1,4 +1,4 @@
-# MCA Study Repository
+# MCA Repository
 
 A full-stack web app for MCA students to upload, browse and search past papers, notes and answer scripts — organized by batch, year, semester and subject.
 
