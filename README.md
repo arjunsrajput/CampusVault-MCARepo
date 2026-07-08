@@ -69,3 +69,5 @@ After registering your first account, open MongoDB Atlas, find your user documen
 - Files: Cloudinary
 
 All free tiers are sufficient for a college club.
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for exact Render and Vercel settings.

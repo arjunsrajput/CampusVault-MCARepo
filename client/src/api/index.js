@@ -1,5 +1,7 @@
 import api from './axios.js'
 
+const apiBaseUrl = import.meta.env.VITE_API_URL?.trim() || '/api'
+
 export const login    = (d) => api.post('/auth/login', d)
 export const register = (d) => api.post('/auth/register', d)
 export const verifyEmail = (token) => api.post('/auth/verify-email', { token })
@@ -16,7 +18,7 @@ export const uploadMaterial   = (form) => api.post('/materials', form, {headers:
 export const updateMaterial   = (id,d) => api.patch(`/materials/${id}`, d)
 // export const trackDownload    = (id)   => api.patch(`/materials/${id}/download`)
 export const trackDownload = (id) => api.patch(`/materials/${id}/download`)
-export const serveFile     = (id) => `/api/materials/${id}/serve`
+export const serveFile     = (id) => `${apiBaseUrl}/materials/${id}/serve`
 
 export const upvoteMaterial   = (id)   => api.patch(`/materials/${id}/upvote`)
 export const flagMaterial     = (id,r) => api.post(`/materials/${id}/flag`,{reason:r})
