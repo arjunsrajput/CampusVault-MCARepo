@@ -18,19 +18,6 @@ const getInitials = (name) =>
     .slice(0, 2)
     .toUpperCase();
 
-function VerificationBadge({ isVerified }) {
-  if (!isVerified) return null;
-
-  return (
-    <span
-      className="badge badge-notes"
-      style={{ display: "inline-flex", alignItems: "center", gap: 4 }}
-    >
-      Verified
-    </span>
-  );
-}
-
 export default function BatchDirectoryPage() {
   const { batch = "" } = useParams();
   const decodedBatch = decodeURIComponent(batch);
@@ -148,7 +135,6 @@ export default function BatchDirectoryPage() {
                     <span className="badge badge-answer">
                       {member.isAlumni ? "Alumni" : `Year ${member.currentYear}`}
                     </span>
-                    <VerificationBadge isVerified={member.isVerified} />
                   </div>
                 </div>
               </div>
@@ -226,7 +212,6 @@ export default function BatchDirectoryPage() {
                   <span className="badge badge-answer">
                     {selected.isAlumni ? "Alumni" : `Year ${selected.currentYear}`}
                   </span>
-                  <VerificationBadge isVerified={selected.isVerified} />
                 </div>
               </div>
               <button type="button" className="btn btn-ghost btn-sm" onClick={() => setSelected(null)}>
