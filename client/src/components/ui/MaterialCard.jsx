@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import {
@@ -25,9 +25,16 @@ export default function MaterialCard({ material, showDelete = false }) {
   const [upvoted, setUpvoted] = useState(
     material.upvotedBy?.some((id) => (id?._id || id)?.toString() === userId),
   );
+  const [upvoteCount, setUpvoteCount] = useState(material.upvotes || 0);
+  const [downloadCount, setDownloadCount] = useState(material.downloads || 0);
   const saved = savedIds.has(material._id);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    setUpvoteCount(material.upvotes || 0);
+    setDownloadCount(material.downloads || 0);
+  }, [material.downloads, material.upvotes]);
 
   const examBadge =
     EXAM_BADGE[material.exam] ||
@@ -48,6 +55,7 @@ export default function MaterialCard({ material, showDelete = false }) {
     try {
       const res = await upvoteMaterial(material._id);
       setUpvoted(res.data.upvoted);
+      setUpvoteCount(res.data.upvotes);
       updateMaterial(material._id, { upvotes: res.data.upvotes });
     } catch {
       toast.error("Failed to upvote");
@@ -70,6 +78,7 @@ export default function MaterialCard({ material, showDelete = false }) {
     e.stopPropagation();
     try {
       const res = await trackDownload(material._id);
+      setDownloadCount(res.data.downloads);
       updateMaterial(material._id, { downloads: res.data.downloads });
       window.open(res.data.fileUrl, "_blank");
     } catch {
@@ -298,7 +307,7 @@ export default function MaterialCard({ material, showDelete = false }) {
               : "var(--border)";
           }}
         >
-          ▲ {material.upvotes || 0} Upvotes
+          ▲ {upvoteCount} Upvotes
         </button>
 
         <button
@@ -326,7 +335,7 @@ export default function MaterialCard({ material, showDelete = false }) {
             e.currentTarget.style.borderColor = "var(--border)";
           }}
         >
-          ↓ {material.downloads || 0} Downloads
+          ↓ {downloadCount} Downloads
         </button>
 
         <button
