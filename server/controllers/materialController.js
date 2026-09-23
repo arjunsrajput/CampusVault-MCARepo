@@ -4,9 +4,7 @@ import { cloudinary, uploadToCloudinary } from "../config/cloudinary.js";
 
 const parseTags = (tags) => {
   if (Array.isArray(tags)) {
-    return tags
-      .map((tag) => String(tag).trim().toLowerCase())
-      .filter(Boolean);
+    return tags.map((tag) => String(tag).trim().toLowerCase()).filter(Boolean);
   }
 
   return tags
@@ -99,15 +97,33 @@ export const getMaterials = async (req, res) => {
       upvoted: { upvotes: -1 },
     };
 
-    const PAGE_SIZE = 20;
-    const skip = (Number(page) - 1) * PAGE_SIZE;
+    //     const PAGE_SIZE = 20;
+    //     const skip = (Number(page) - 1) * PAGE_SIZE;
 
+    //     const [materials, total] = await Promise.all([
+    //       Material.find(filter)
+    //         .populate("uploadedBy", "name batch rollNumber")
+    //         .sort(sortMap[sort] || sortMap.newest)
+    //         .skip(skip)
+    //         .limit(PAGE_SIZE)
+    //         .lean(),
+    //       Material.countDocuments(filter),
+    //     ]);
+
+    //     res.json({
+    //       materials,
+    //       total,
+    //       pages: Math.ceil(total / PAGE_SIZE),
+    //       page: Number(page),
+    //     });
+    //   } catch (err) {
+    //     res.status(500).json({ error: err.message });
+    //   }
+    // };
     const [materials, total] = await Promise.all([
       Material.find(filter)
         .populate("uploadedBy", "name batch rollNumber")
         .sort(sortMap[sort] || sortMap.newest)
-        .skip(skip)
-        .limit(PAGE_SIZE)
         .lean(),
       Material.countDocuments(filter),
     ]);
@@ -115,8 +131,8 @@ export const getMaterials = async (req, res) => {
     res.json({
       materials,
       total,
-      pages: Math.ceil(total / PAGE_SIZE),
-      page: Number(page),
+      pages: 1,
+      page: 1,
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
