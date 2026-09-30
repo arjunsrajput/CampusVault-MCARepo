@@ -24,19 +24,19 @@ app.use(cors({
 app.use(express.json({ limit: '10kb' }))
 app.use(morgan('dev'))
 
-const globalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 200,
-  message: { error: 'Too many requests, please try again later.' }
-})
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 20,
-  message: { error: 'Too many auth attempts, please try again later.' }
-})
+// const globalLimiter = rateLimit({
+//   windowMs: 15 * 60 * 1000,
+//   max: 200,
+//   message: { error: 'Too many requests, please try again later.' }
+// })
+// const authLimiter = rateLimit({
+//   windowMs: 15 * 60 * 1000,
+//   max: 20,
+//   message: { error: 'Too many auth attempts, please try again later.' }
+// })
 
-app.use('/api', globalLimiter)
-app.use('/api/auth', authLimiter)
+// app.use('/api', globalLimiter)
+// app.use('/api/auth', authLimiter)
 
 app.use('/api/auth',      authRoutes)
 app.use('/api/materials', materialRoutes)
