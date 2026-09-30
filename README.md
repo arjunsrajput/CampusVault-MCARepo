@@ -1,4 +1,4 @@
-# 🎓 MCA Repository (MCARepo)
+# 🎓 CampusVault : MCA Repository (MCARepo)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![React](https://img.shields.io/badge/React-18.2.0-61DAFB?logo=react&logoColor=black)](https://react.dev/)
