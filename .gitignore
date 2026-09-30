@@ -16,3 +16,6 @@ client/dist
 client/.env
 server/.env
 INTERVIEW_PREP.md
+.codex-checkpoints/
+DEPLOYMENT.md
+server.zip
